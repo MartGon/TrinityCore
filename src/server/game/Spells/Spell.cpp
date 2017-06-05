@@ -5244,12 +5244,17 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_POWER_BURN:
             case SPELL_EFFECT_POWER_DRAIN:
             {
+                //Falla aqui
                 // Can be area effect, Check only for players and not check if target - caster (spell can have multiply drain/burn effects)
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    if (Unit* target = m_targets.GetUnitTarget())
-                        if (target != m_caster && target->getPowerType() != Powers(effect->MiscValue))
-                            return SPELL_FAILED_BAD_TARGETS;
-                break;
+                if(TARGET_UNIT_CASTER != effect->TargetA.GetTarget())
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        if (Unit* target = m_targets.GetUnitTarget())
+                        {
+                            std::cout << "el target powertype " << target->getPowerType() << "Powers " << Powers(effect->MiscValue) << "\n";
+                            if (target != m_caster && target->getPowerType() != Powers(effect->MiscValue))
+                                return SPELL_FAILED_BAD_TARGETS;
+                        }
+                    break;
             }
             case SPELL_EFFECT_CHARGE:
             {

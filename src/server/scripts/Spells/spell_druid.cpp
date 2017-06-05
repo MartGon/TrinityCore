@@ -62,6 +62,35 @@ enum DruidSpells
     SPELL_DRUID_SURVIVAL_INSTINCTS          = 50322
 };
 
+// 768 - Cat Form
+class spell_dru_cat_form : public SpellScriptLoader
+{
+public:
+    spell_dru_cat_form() : SpellScriptLoader("spell_dru_cat_form") { }
+
+    class spell_dru_cat_form_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_cat_form_AuraScript);
+
+        void HandleOnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            std::cout << "Sienod hookeado dash\n";
+            // do not set speed if not in cat form
+            GetUnitOwner()->RemoveAura(5215);
+        }
+
+        void Register() override
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_dru_cat_form_AuraScript::HandleOnRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_cat_form_AuraScript();
+    }
+};
+
 // 1850 - Dash
 class spell_dru_dash : public SpellScriptLoader
 {
@@ -74,6 +103,7 @@ public:
 
         void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
+            std::cout << "Sienod hookeado dash\n";
             // do not set speed if not in cat form
             if (GetUnitOwner()->GetShapeshiftForm() != FORM_CAT_FORM)
                 amount = 0;
@@ -85,9 +115,28 @@ public:
         }
     };
 
+    class spell_dru_dash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_dash_SpellScript);
+
+        void HandleOnCast()
+        {
+            GetCaster()->CastSpell(GetCaster(), 768, true);
+        }
+
+        void Register() override
+        {
+            OnCast += SpellCastFn(spell_dru_dash_SpellScript::HandleOnCast);
+        }
+    };
+
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_dash_AuraScript();
+    }
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_dash_SpellScript();
     }
 };
 
@@ -119,6 +168,52 @@ public:
     SpellScript* GetSpellScript() const override
     {
         return new spell_dru_flight_form_SpellScript();
+    }
+};
+
+// 22568 - Ferocious Bite
+class spell_dru_ferocious_bite : public SpellScriptLoader
+{
+public:
+    spell_dru_ferocious_bite() : SpellScriptLoader("spell_dru_ferocious_bite") { }
+
+    class spell_dru_ferocious_bite_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_ferocious_bite_SpellScript);
+
+        void HandleOnHit(SpellEffIndex effIndex)
+        {
+            int32 ap = GetCaster()->ToPlayer()->GetInt32Value(UNIT_FIELD_ATTACK_POWER);
+            int32 combo = GetCaster()->GetPower(POWER_COMBO_POINTS) + 1;
+            SetHitDamage((1+ap*3.745f)*combo/5*(EnergyPowerUp*0.04+1)); // 0.04 = 1 / 25;
+            std::cout << "ATtackPower " << ap << " combopoints " << combo << " Energia " << EnergyPowerUp << "\n";
+        }
+
+        void GetData()
+        {
+            EnergyPowerUp = GetCaster()->GetPower(POWER_ENERGY)-25;
+            if (EnergyPowerUp > 25)
+                EnergyPowerUp = 25;
+        }
+
+        void ComboReset()
+        {
+            GetCaster()->SetPower(POWER_COMBO_POINTS, 0);
+        }
+
+    private: int32 EnergyPowerUp;
+
+        void Register() override
+        {
+            BeforeCast += SpellCastFn(spell_dru_ferocious_bite_SpellScript::GetData);
+            OnEffectHitTarget += SpellEffectFn(spell_dru_ferocious_bite_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(spell_dru_ferocious_bite_SpellScript::ComboReset);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_ferocious_bite_SpellScript();
     }
 };
 
@@ -489,6 +584,57 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_predatory_strikes_AuraScript();
+    }
+};
+
+// 5215 - Prowl
+class spell_dru_prowl : public SpellScriptLoader
+{
+public:
+    spell_dru_prowl() : SpellScriptLoader("spell_dru_prowl") { }
+
+    class spell_dru_prowl_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_prowl_SpellScript);
+
+        void HandleOnCast()
+        {
+            GetCaster()->CastSpell(GetCaster(),768,true);
+        }
+
+        void Register() override
+        {
+            OnCast += SpellCastFn(spell_dru_prowl_SpellScript::HandleOnCast);
+        }
+    };
+
+    class spell_dru_prowl_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_prowl_AuraScript);
+
+
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            std::cout << "Sienod hookeado\n";
+            // do not set speed if not in cat form
+            if (GetUnitOwner()->GetShapeshiftForm() != FORM_CAT_FORM)
+                GetUnitOwner()->RemoveAura(5215);
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_prowl_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_MOD_SPEED_ALWAYS);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_prowl_SpellScript();
+    }
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_prowl_AuraScript();
     }
 };
 
@@ -1284,7 +1430,9 @@ public:
 
 void AddSC_druid_spell_scripts()
 {
+    new spell_dru_cat_form();
     new spell_dru_dash();
+    new spell_dru_ferocious_bite();
     new spell_dru_flight_form();
     new spell_dru_forms_trinket();
     new spell_dru_idol_lifebloom();
@@ -1295,6 +1443,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_moonfire();
     new spell_dru_omen_of_clarity();
     new spell_dru_predatory_strikes();
+    new spell_dru_prowl();
     new spell_dru_rip();
     new spell_dru_savage_roar();
     new spell_dru_stampede();

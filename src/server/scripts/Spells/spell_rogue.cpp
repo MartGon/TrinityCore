@@ -49,13 +49,22 @@ enum RogueSpells
     SPELL_ROGUE_STEALTH_STEALTH_AURA                = 158185,
     SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA             = 158188,
     SPELL_ROGUE_VANISH_AURA                         = 11327,
+    SPELL_ROGUE_OPPORTUNITY                         = 195627,
     SPELL_ROGUE_PREY_ON_THE_WEAK                    = 58670,
     SPELL_ROGUE_SHIV_TRIGGERED                      = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628,
     SPELL_ROGUE_SERRATED_BLADES_R1                  = 14171,
+    SPELL_ROGUE_SABER_SLASH                         = 193315,
+    SPELL_ROGUE_SABER_SLASH_PROC                    = 197834,
     SPELL_ROGUE_RUPTURE                             = 1943,
     SPELL_ROGUE_HONOR_AMONG_THIEVES_ENERGIZE        = 51699,
+    SPELL_ROGUE_JOLLY_ROGER                         = 199603,
+    SPELL_ROGUE_GRAND_MELEE                         = 193358,
+    SPELL_ROGUE_SHARK_INFESTED_WATER                = 193357,
+    SPELL_ROGUE_TRUE_BEARING                        = 193359,
+    SPELL_ROGUE_BURIED_TREASURE                     = 199600,
+    SPELL_ROGUE_BROADSIDES                          = 193356,
     SPELL_ROGUE_T5_2P_SET_BONUS                     = 37169
 };
 
@@ -327,6 +336,34 @@ class spell_rog_deadly_poison : public SpellScriptLoader
         }
 };
 
+// 196937 - Ghostly Strike
+class spell_rog_ghostly_strike : public SpellScriptLoader
+{
+public:
+    spell_rog_ghostly_strike() : SpellScriptLoader("spell_rog_ghostly_strike") { }
+
+    class spell_rog_ghostly_strike_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_ghostly_strike_AuraScript);
+
+        void HandleOnApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            //PreventDefaultAction();
+            GetSpellInfo()->GetEffect(EFFECT_4)->CalcBaseValue(100);
+        }
+
+        void Register() override
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_rog_ghostly_strike_AuraScript::HandleOnApply, EFFECT_4, SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_ghostly_strike_AuraScript();
+    }
+};
+
 // 51690 - Killing Spree
 #define KillingSpreeScriptName "spell_rog_killing_spree"
 class spell_rog_killing_spree : public SpellScriptLoader
@@ -566,6 +603,44 @@ class spell_rog_rupture : public SpellScriptLoader
         AuraScript* GetAuraScript() const override
         {
             return new spell_rog_rupture_AuraScript();
+        }
+};
+
+// 193316 - Saber Slash
+class spell_rog_saber_slash : public SpellScriptLoader
+{
+    public:
+        spell_rog_saber_slash() : SpellScriptLoader("spell_rog_saber_slash") { }
+
+        class spell_rog_saber_slash_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rog_saber_slash_SpellScript);
+
+            void HandleOnHit(SpellEffIndex /*effIndex*/)
+            {
+                if (roll_chance_i(points))
+                {
+                    GetCaster()->CastSpell(GetExplTargetUnit(), SPELL_ROGUE_SABER_SLASH_PROC, true);
+                    GetCaster()->CastSpell(GetCaster(), SPELL_ROGUE_OPPORTUNITY, true);
+                }
+            }
+
+            void HandleOnLaunch(SpellEffIndex /*effIndex*/)
+            {
+                points = GetEffectValue();
+            }
+
+        private: int32 points;
+            void Register() override
+            {
+                OnEffectLaunch += SpellEffectFn(spell_rog_saber_slash_SpellScript::HandleOnLaunch, EFFECT_4, SPELL_EFFECT_DUMMY);
+                OnEffectHit += SpellEffectFn(spell_rog_saber_slash_SpellScript::HandleOnHit, EFFECT_2, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_rog_saber_slash_SpellScript();
         }
 };
 
@@ -927,24 +1002,69 @@ public:
     {
         PrepareSpellScript(spell_rog_eviscerate_SpellScript);
 
+
         void CalculateDamage(SpellEffIndex /*effIndex*/)
         {
-            int32 damagePerCombo = int32(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.559f);
-            if (AuraEffect const* t5 = GetCaster()->GetAuraEffect(SPELL_ROGUE_T5_2P_SET_BONUS, EFFECT_0))
-                damagePerCombo += t5->GetAmount();
+            int32 damagePerCombo = int32(GetCaster()->GetInt32Value(UNIT_FIELD_ATTACK_POWER) * 1.42f);
+            SetHitDamage(GetEffectValue() + damagePerCombo * GetCaster()->GetPower(POWER_COMBO_POINTS));
+        }
 
-            SetEffectValue(GetEffectValue() + damagePerCombo * GetCaster()->GetPower(POWER_COMBO_POINTS));
+        void HandleAfterHit()
+        {
+            if (GetCaster()->HasAura(14161) && roll_chance_i((GetCaster()->GetPower(POWER_COMBO_POINTS) + 1) * 20))
+                GetCaster()->SetPower(POWER_COMBO_POINTS, 1);
+            else
+                GetCaster()->SetPower(POWER_COMBO_POINTS, 0);
         }
 
         void Register() override
         {
             OnEffectLaunchTarget += SpellEffectFn(spell_rog_eviscerate_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(spell_rog_eviscerate_SpellScript::HandleAfterHit);
         }
     };
 
     SpellScript* GetSpellScript() const override
     {
         return new spell_rog_eviscerate_SpellScript();
+    }
+};
+
+// 199804 -  Between the Eyes
+class spell_rog_between_eyes : public SpellScriptLoader
+{
+public:
+    spell_rog_between_eyes() : SpellScriptLoader("spell_rog_between_eyes") { }
+
+    class spell_rog_between_eyes_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_between_eyes_SpellScript);
+
+
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        {
+            int32 damagePerCombo = int32(GetCaster()->GetInt32Value(UNIT_FIELD_ATTACK_POWER) * 0.85f);
+            SetHitDamage(GetEffectValue() + damagePerCombo * GetCaster()->GetPower(POWER_COMBO_POINTS));
+        }
+
+        void HandleAfterHit()
+        {
+            if (GetCaster()->HasAura(14161) && roll_chance_i((GetCaster()->GetPower(POWER_COMBO_POINTS)+1) * 20))
+                GetCaster()->SetPower(POWER_COMBO_POINTS, 1);
+            else
+                GetCaster()->SetPower(POWER_COMBO_POINTS, 0);
+        }
+
+        void Register() override
+        {
+            OnEffectLaunchTarget += SpellEffectFn(spell_rog_between_eyes_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(spell_rog_between_eyes_SpellScript::HandleAfterHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_between_eyes_SpellScript();
     }
 };
 
@@ -979,12 +1099,304 @@ public:
     }
 };
 
+// 195457 - Grappling Hook
+class spell_rog_grappling_hook : public SpellScriptLoader
+{
+public:
+    spell_rog_grappling_hook() : SpellScriptLoader("spell_rog_grappling_hook") { }
+
+    class spell_rog_grappling_hook_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_grappling_hook_SpellScript);
+
+        void HandleAfterHit(SpellEffIndex /*effIndex*/)
+        {
+            const_cast<SpellEffectInfo*>(sSpellMgr->GetSpellInfo(57604)->GetEffect(EFFECT_0))->MiscValue = 10;
+            const_cast<SpellEffectInfo*>(sSpellMgr->GetSpellInfo(57604)->GetEffect(EFFECT_0))->MiscValueB = 150;
+            if (WorldLocation* dest = GetHitDest())
+                GetCaster()->CastSpell(dest->GetPositionX(), dest->GetPositionY(), dest->GetPositionZ(), 57604, true);
+        }
+
+        void Register() override
+        {
+            OnEffectHit += SpellEffectFn(spell_rog_grappling_hook_SpellScript::HandleAfterHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_grappling_hook_SpellScript();
+    }
+};
+
+// 14161 - Ruthlessness
+class spell_rog_ruthlessness : public SpellScriptLoader
+{
+public:
+    spell_rog_ruthlessness() : SpellScriptLoader("spell_rog_ruthlessness") { }
+
+    class spell_rog_ruthlessness_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_ruthlessness_AuraScript);
+
+        void HandleOnApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            //PreventDefaultAction();
+            //GetSpellInfo()->GetEffect(EFFECT_4)->CalcBaseValue(100);
+            std::cout << "El proc esta aqui\n";
+        }
+
+        void Register() override
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_rog_ruthlessness_AuraScript::HandleOnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_ruthlessness_AuraScript();
+    }
+};
+
+// 193316 - Roll the Bones
+class spell_rog_roll_bones : public SpellScriptLoader
+{
+public:
+    spell_rog_roll_bones() : SpellScriptLoader("spell_rog_roll_bones") { }
+
+    class spell_rog_roll_bones_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_roll_bones_SpellScript);
+
+        void HandleAfterCast() 
+        {
+            spellIDs.push_back(SPELL_ROGUE_BURIED_TREASURE);
+            spellIDs.push_back(SPELL_ROGUE_BROADSIDES);
+            spellIDs.push_back(SPELL_ROGUE_GRAND_MELEE);
+            spellIDs.push_back(SPELL_ROGUE_JOLLY_ROGER);
+            spellIDs.push_back(SPELL_ROGUE_TRUE_BEARING);
+            spellIDs.push_back(SPELL_ROGUE_SHARK_INFESTED_WATER);
+
+            int32 dice_number = spellIDs.size();
+
+            for (std::vector<int32>::iterator itr = spellIDs.begin(); itr != spellIDs.end(); itr++)
+                GetCaster()->RemoveAura(*itr);
+
+            for (int i = 0; i < 6; i++) 
+            {
+                int32 selector = irand(0, dice_number - 1);
+                count[spellIDs.at(selector)]++;
+            }
+
+            GetWinner(count);
+            AddAuras();
+        }
+
+    private:
+        int32 GetWinner(std::map<int32, int32> map)
+        {
+            int32 max = 0;
+            winner = 0;
+            winner2 = 0;
+            winner3 = 0;
+            for (std::map<int32, int32>::iterator itr = map.begin(); itr != map.end(); itr++) 
+            {
+                std::cout << "El first " << itr->first << "El second " << itr->second << "\n";
+                if (max > 3)
+                    break;
+                if (itr == map.begin())
+                {
+                    max = itr->second;
+                    winner = itr->first;
+                    continue;
+                }
+                if (max >= itr->second)
+                    continue;
+                if (max < itr->second) 
+                {
+                    max = itr->second;
+                    winner = itr->first;
+                }
+            }
+            if (max == 1)isTie = true;
+            if (max == 2)
+                for (std::map<int32, int32>::iterator itr = map.begin(); itr != map.end(); itr++)
+                {
+                    if (winner2 != 0 && itr->second == max && itr->first != winner && itr->first != winner2) 
+                        winner3 = itr->first;
+                    if (itr->second == max && itr->first != winner) 
+                        winner2 = itr->first;
+                }
+            if(max == 3)
+                for (std::map<int32, int32>::iterator itr = map.begin(); itr != map.end(); itr++)
+                {
+                    if (itr->second == max && itr->first != winner)
+                        winner2 = itr->first;
+                }
+            return winner;
+        }
+
+        int32 CalcDuration()
+        {
+            int32 duration = 0;
+            duration = (GetCaster()->GetPower(POWER_COMBO_POINTS) + 1) * 6 + 6;
+            return duration;
+        }
+
+        void AddAuras()
+        {
+            std::cout << "winner " << winner << " winner2 " << winner2 << " winner3 " << winner3;
+            if (isTie)
+                for (std::vector<int32>::iterator itr = spellIDs.begin(); itr != spellIDs.end(); itr++)
+                {
+                    GetCaster()->CastSpell(GetCaster(), *itr, true);
+                    //GetCaster()->GetAura(*itr)->SetDuration(CalcDuration());
+                    return;
+                }
+            if (winner3 !=0)
+            {
+                GetCaster()->CastSpell(GetCaster(), winner3, true);
+                //GetCaster()->GetAuraD(winner2)->SetDuration(CalcDuration());
+            }
+            if (winner2 !=0)
+            {
+                GetCaster()->CastSpell(GetCaster(), winner2, true);
+                //GetCaster()->GetAura(winner2)->SetDuration(CalcDuration());
+            }
+            GetCaster()->CastSpell(GetCaster(), winner, true);
+            GetCaster()->AddAura(winner, GetCaster());
+            std::cout << "La duracion es " << GetCaster()->GetAura(winner)->GetDuration();
+            GetCaster()->GetAura(winner)->SetDuration(CalcDuration(),true);
+            std::cout << "La duracion es " << GetCaster()->GetAura(winner)->GetDuration();
+        }
+
+        std::vector<int32> spellIDs;
+        std::map<int32, int32> count;
+        int32 winner;
+        int32 winner2;
+        int32 winner3;
+        bool isTie = false;
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(spell_rog_roll_bones_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_roll_bones_SpellScript();
+    }
+};
+
+// 152150 - Death from above
+// Intentar con handle on remove del apply aura
+Unit *dfa_target;
+float orient;
+int32 count;
+class spell_rog_dfa : public SpellScriptLoader
+{
+public:
+    spell_rog_dfa() : SpellScriptLoader("spell_rog_dfa") { }
+
+    class spell_rog_dfa_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_dfa_SpellScript);
+
+        void HandleOnHit(SpellEffIndex /*effIndex*/)
+        {
+            dfa_target = GetExplTargetUnit();
+        }
+
+        void HandleAfterHit()
+        {
+            std::cout << "Hola quea se\n";
+            dfa_target = GetExplTargetUnit();
+            Position dest = GetCaster()->GetPosition();
+            orient = GetCaster()->GetOrientation();
+            float x = dest.GetPositionX() + 3 * std::cos(orient);
+            float y = dest.GetPositionY() + 3 * std::sin(orient);
+            GetCaster()->CastSpell(x, y, dest.GetPositionZ() + 10, 64431, true);    
+        }
+
+        void Register() override
+        {
+            OnCast += SpellCastFn(spell_rog_dfa_SpellScript::HandleAfterHit);
+        }
+    };
+
+    class spell_rog_dfa_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_dfa_AuraScript);
+
+        void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            if (dfa_target)
+            {
+                const_cast<SpellEffectInfo*>(sSpellMgr->GetSpellInfo(156327)->GetEffect(EFFECT_1))->MiscValue = 3;
+                const_cast<SpellEffectInfo*>(sSpellMgr->GetSpellInfo(156327)->GetEffect(EFFECT_1))->MiscValue = 150;
+                const_cast<SpellEffectInfo*>(sSpellMgr->GetSpellInfo(156327)->GetEffect(EFFECT_1))->Effect = SPELL_EFFECT_JUMP_DEST;
+                Position dest = dfa_target->GetPosition();
+                GetCaster()->CastSpell(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(),156327, true);
+            }
+                
+            GetCaster()->SetOrientation(orient);
+        }
+
+        void Register() override
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_dfa_AuraScript::HandleOnRemove, EFFECT_3, SPELL_AURA_IGNORE_HIT_DIRECTION, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_dfa_AuraScript();
+    }
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_dfa_SpellScript();
+    }
+};
+
+// 215212 - DFA jump
+class spell_rog_dfa_jump : public SpellScriptLoader
+{
+public:
+    spell_rog_dfa_jump() : SpellScriptLoader("spell_rog_dfa_jump") { }
+
+    class spell_rog_dfa_jump_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_dfa_jump_SpellScript);
+
+        void HandleAfterHit(SpellEffIndex /**/)
+        {
+            std::cout << "Hola\n";
+            GetCaster()->SetOrientation(orient);
+        }
+
+        void Register() override
+        {
+          OnEffectHit += SpellEffectFn(spell_rog_dfa_jump_SpellScript::HandleAfterHit, EFFECT_0, SPELL_EFFECT_JUMP_DEST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_dfa_jump_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
     new spell_rog_cheat_death();
     new spell_rog_crippling_poison();
     new spell_rog_deadly_poison();
+   // new spell_rog_ghostly_strike();
     new spell_rog_killing_spree();
     new spell_rog_master_of_subtlety();
     new spell_rog_preparation();
@@ -995,8 +1407,15 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_vanish_aura();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
+    new spell_rog_saber_slash();
     new spell_rog_serrated_blades();
     new spell_rog_honor_among_thieves();
     new spell_rog_eviscerate();
+    new spell_rog_between_eyes();
     new spell_rog_envenom();
+    new spell_rog_grappling_hook();
+    new spell_rog_dfa();
+    new spell_rog_dfa_jump();
+    new spell_rog_roll_bones();
+    new spell_rog_ruthlessness();
 }

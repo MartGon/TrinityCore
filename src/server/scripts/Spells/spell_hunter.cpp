@@ -45,6 +45,7 @@ enum HunterSpells
     SPELL_HUNTER_CHIMERA_SHOT_HEAL                  = 53353,
     SPELL_HUNTER_EXHILARATION                       = 109304,
     SPELL_HUNTER_EXHILARATION_PET                   = 128594,
+    SPELL_HUNTER_EXHILARATION_R2                    = 231546,
     SPELL_HUNTER_FIRE                               = 82926,
     SPELL_HUNTER_FLANKING_STRIKE                    = 202800,
     SPELL_HUNTER_FLANKING_STRIKE_R2                 = 237327,
@@ -338,8 +339,8 @@ class spell_hun_flanking_strike : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                return ValidateSpellInfo
-                ({
+               
+                return ValidateSpellInfo({
                     SPELL_HUNTER_ASPECT_BEAST,
                     SPELL_HUNTER_ASPECT_EAGLE,
                     SPELL_HUNTER_ANIMAL_INSTINCTS,
@@ -623,8 +624,8 @@ class spell_hun_hunting_party : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                GetTarget()->GetSpellHistory()->ModifyCooldown(SPELL_HUNTER_EXHILARATION, Seconds(aurEff->GetAmount()));
-                GetTarget()->GetSpellHistory()->ModifyCooldown(SPELL_HUNTER_EXHILARATION_PET, Seconds(aurEff->GetAmount()));
+                GetTarget()->GetSpellHistory()->ModifyCooldown(SPELL_HUNTER_EXHILARATION, Seconds(-aurEff->GetAmount()));
+                GetTarget()->GetSpellHistory()->ModifyCooldown(SPELL_HUNTER_EXHILARATION_PET, Seconds(-aurEff->GetAmount()));
             }
 
             void Register() override
@@ -1425,6 +1426,71 @@ class spell_hun_tnt : public SpellScriptLoader
         }
 };
 
+// 194386 - Volley
+class spell_hun_volley : public SpellScriptLoader
+{
+    public:
+        spell_hun_volley() : SpellScriptLoader("spell_hun_volley") { }
+
+        class spell_hun_volley_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_volley_AuraScript);
+
+            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                std::cout << "Hola que as por mas\n";
+                GetTarget()->SetPower(POWER_FOCUS, GetTarget()->GetPower(POWER_FOCUS) - aurEff->GetAmount());
+            }
+
+            void Register() override
+            {
+                OnEffectProc += AuraEffectProcFn(spell_hun_volley_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const override
+        {
+            return new spell_hun_volley_AuraScript();
+        }
+};
+
+// 109304 - Exhilaration
+class spell_hun_exhilaration : public SpellScriptLoader
+{
+    public:
+        spell_hun_exhilaration() : SpellScriptLoader("spell_hun_exhilaration") { }
+
+        class spell_hun_exhilaration_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hun_exhilaration_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) override
+            {
+                return ValidateSpellInfo
+                ({
+                    SPELL_HUNTER_EXHILARATION_R2
+                });
+            }
+
+            void HandleOnHit()
+            {
+                if(GetCaster()->HasAura(SPELL_HUNTER_EXHILARATION_R2))
+                    if(Unit* pet = GetCaster()->GetGuardianPet())
+                        GetCaster()->CastSpell(pet, SPELL_HUNTER_EXHILARATION_PET, true);
+            }
+
+            void Register() override
+            {
+                OnHit += SpellHitFn(spell_hun_exhilaration_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_hun_exhilaration_SpellScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_ancient_hysteria();
@@ -1456,4 +1522,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_target_only_pet_and_owner();
     new spell_hun_t9_4p_bonus();
     new spell_hun_tnt();
+    new spell_hun_volley();
+    new spell_hun_exhilaration();
 }
