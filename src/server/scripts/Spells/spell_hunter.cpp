@@ -264,33 +264,6 @@ class spell_hun_disengage : public SpellScriptLoader
         }
 };
 
-// 194386 - Volley
-class spell_hun_volley : public SpellScriptLoader
-{
-    public:
-        spell_hun_volley() : SpellScriptLoader("spell_hun_volley") { }
-
-        class spell_hun_volley_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_hun_volley_AuraScript);
-
-            void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
-            {
-                GetTarget()->SetPower(POWER_FOCUS, GetTarget()->GetPower(POWER_FOCUS) - aurEff->GetAmount());
-            }
-
-            void Register() override
-            {
-                OnEffectProc += AuraEffectProcFn(spell_hun_volley_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const override
-        {
-            return new spell_hun_volley_AuraScript();
-        }
-};
-
 // 212658 - Hunting Party
 class spell_hun_hunting_party : public SpellScriptLoader
 {
@@ -931,6 +904,33 @@ class spell_hun_tame_beast : public SpellScriptLoader
         {
             return new spell_hun_tame_beast_SpellScript();
         }
+};
+
+// 194386 - Volley
+class spell_hun_volley : public SpellScriptLoader
+{
+public:
+    spell_hun_volley() : SpellScriptLoader("spell_hun_volley") { }
+
+    class spell_hun_volley_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_hun_volley_AuraScript);
+
+        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+        {
+            GetTarget()->SetPower(POWER_FOCUS, GetTarget()->GetPower(POWER_FOCUS) - aurEff->GetAmount());
+        }
+
+        void Register() override
+        {
+            OnEffectProc += AuraEffectProcFn(spell_hun_volley_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_hun_volley_AuraScript();
+    }
 };
 
 //  53434 - Call of the Wild
