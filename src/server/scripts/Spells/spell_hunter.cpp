@@ -379,6 +379,48 @@ class spell_hun_improved_mend_pet : public SpellScriptLoader
         }
 };
 
+// 34026 - Kill Command -- Needs 166615 to allow cast
+class spell_hun_kill_command : public SpellScriptLoader
+{
+    public:
+        spell_hun_kill_command() : SpellScriptLoader("spell_hun_kill_command") { }
+
+        class spell_hun_kill_command_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hun_kill_command_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetDistance(GetExplTargetUnit()->GetPosition()) > 25)
+                {
+                    SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_TARGET_TOO_FAR);
+                    return SPELL_FAILED_CUSTOM_ERROR;
+                }
+                    return SPELL_CAST_OK;
+            }
+
+            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            {
+                int32 rap = GetCaster()->GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
+                int32 level = GetCaster()->getLevel();
+                float value = 1.5 * (1 + (rap * 3)) * 1.18 * (0.5 + std::min(level, 20) * 0.025);
+                SetHitDamage(value);
+            }
+
+            void Register() override
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_hun_kill_command_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnCheckCast += SpellCheckCastFn(spell_hun_kill_command_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_hun_kill_command_SpellScript();
+        }
+};
+
+
 // 53478 - Last Stand Pet
 class spell_hun_last_stand_pet : public SpellScriptLoader
 {
@@ -1067,6 +1109,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_disengage();
     new spell_hun_hunting_party();
     new spell_hun_improved_mend_pet();
+    new spell_hun_kill_command();
     new spell_hun_last_stand_pet();
     new spell_hun_masters_call();
     new spell_hun_misdirection();

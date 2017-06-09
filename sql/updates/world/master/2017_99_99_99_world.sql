@@ -1,4 +1,4 @@
 -- Arcane shot
-DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_hun_arcane_shot';
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_hun_kill_command';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) 
-VALUES(185358,'spell_hun_arcane_shot');
+VALUES(34026,'spell_hun_kill_command');
