@@ -35,6 +35,7 @@ enum HunterSpells
     SPELL_HUNTER_ASPECT_CHEETAH_SLOW                = 186258,
     SPELL_HUNTER_BESTIAL_WRATH                      = 19574,
     SPELL_HUNTER_CHIMERA_SHOT_HEAL                  = 53353,
+    SPELL_HUNTER_DISENGAGE                          = 781,
     SPELL_HUNTER_EXHILARATION                       = 109304,
     SPELL_HUNTER_EXHILARATION_PET                   = 128594,
     SPELL_HUNTER_FIRE                               = 82926,
@@ -261,6 +262,33 @@ class spell_hun_disengage : public SpellScriptLoader
         SpellScript* GetSpellScript() const override
         {
             return new spell_hun_disengage_SpellScript();
+        }
+};
+
+// 199564 - Farstrider
+class spell_hun_farstrider : public SpellScriptLoader
+{
+    public:
+        spell_hun_farstrider() : SpellScriptLoader("spell_hun_farstrider") { }
+
+        class spell_hun_farstrider_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hun_farstrider_SpellScript);
+
+            void HandleOnHit()
+            {
+                GetCaster()->GetSpellHistory()->RestoreCharge(sSpellMgr->GetSpellInfo(SPELL_HUNTER_DISENGAGE)->ChargeCategoryId);
+            }
+
+            void Register() override
+            {
+                OnHit += SpellHitFn(spell_hun_farstrider_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_hun_farstrider_SpellScript();
         }
 };
 
@@ -1026,6 +1054,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_chimera_shot();
     new spell_hun_cobra_shot();
     new spell_hun_disengage();
+    new spell_hun_farstrider();
     new spell_hun_hunting_party();
     new spell_hun_improved_mend_pet();
     new spell_hun_last_stand_pet();
