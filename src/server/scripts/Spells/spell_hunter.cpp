@@ -35,6 +35,7 @@ enum HunterSpells
     SPELL_HUNTER_ASPECT_CHEETAH_SLOW                = 186258,
     SPELL_HUNTER_BESTIAL_WRATH                      = 19574,
     SPELL_HUNTER_CHIMERA_SHOT_HEAL                  = 53353,
+    SPELL_HUNTER_DIRE_BEAST_FOCUS                   = 120694,
     SPELL_HUNTER_EXHILARATION                       = 109304,
     SPELL_HUNTER_EXHILARATION_PET                   = 128594,
     SPELL_HUNTER_FIRE                               = 82926,
@@ -231,6 +232,35 @@ class spell_hun_cobra_shot : public SpellScriptLoader
         {
             return new spell_hun_cobra_shot_SpellScript();
         }
+};
+
+
+// 120679 - Dire Beast
+class spell_hun_dire_beast : public SpellScriptLoader
+{
+public:
+    spell_hun_dire_beast() : SpellScriptLoader("spell_hun_dire_beast") { }
+
+    class spell_hun_dire_beast_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_dire_beast_SpellScript);
+
+        void HandleOnLaunch(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_DIRE_BEAST_FOCUS, true);
+            GetCaster()->CastSpell((Unit*)nullptr, 204422, true);
+        }
+
+        void Register() override
+        {
+            OnEffectLaunch += SpellEffectFn(spell_hun_dire_beast_SpellScript::HandleOnLaunch, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_hun_dire_beast_SpellScript();
+    }
 };
 
 // 781 - Disengage
@@ -1026,6 +1056,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_chimera_shot();
     new spell_hun_cobra_shot();
     new spell_hun_disengage();
+    new spell_hun_dire_beast();
     new spell_hun_hunting_party();
     new spell_hun_improved_mend_pet();
     new spell_hun_last_stand_pet();
