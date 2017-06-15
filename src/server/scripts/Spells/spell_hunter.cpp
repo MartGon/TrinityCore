@@ -296,37 +296,6 @@ class spell_hun_cobra_shot : public SpellScriptLoader
         }
 };
 
-// 781 - Disengage
-class spell_hun_disengage : public SpellScriptLoader
-{
-    public:
-        spell_hun_disengage() : SpellScriptLoader("spell_hun_disengage") { }
-
-        class spell_hun_disengage_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_hun_disengage_SpellScript);
-
-            SpellCastResult CheckCast()
-            {
-                Unit* caster = GetCaster();
-                if (caster->GetTypeId() == TYPEID_PLAYER && !caster->IsInCombat())
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-
-                return SPELL_CAST_OK;
-            }
-
-            void Register() override
-            {
-                OnCheckCast += SpellCheckCastFn(spell_hun_disengage_SpellScript::CheckCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_hun_disengage_SpellScript();
-        }
-};
-
 // 202800 - Flanking Strike
 class spell_hun_flanking_strike : public SpellScriptLoader
 {
@@ -571,9 +540,9 @@ class spell_hun_hunting_companion : public SpellScriptLoader
                                 {
                                     // Aspect of the Eagle + Flanking strike;
                                     if (owner->HasAura(SPELL_HUNTER_FLANKING_STRIKE_R2))
-                                        return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() * 2 + 25);
+                                        return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() * 2 + owner->GetAura(SPELL_HUNTER_ASPECT_EAGLE)->GetEffect(EFFECT_0)->GetAmount());
                                     else
-                                        return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() + 25);
+                                        return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() + owner->GetAura(SPELL_HUNTER_ASPECT_EAGLE)->GetEffect(EFFECT_0)->GetAmount());
                                 }
                                     // Flanking Strike
                                 if (owner->HasAura(SPELL_HUNTER_FLANKING_STRIKE_R2))
@@ -585,7 +554,7 @@ class spell_hun_hunting_companion : public SpellScriptLoader
                             return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount());
                         }
                         if (GetTarget()->HasAura(SPELL_HUNTER_ASPECT_EAGLE))   // Aspect of the Eagle 
-                            return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() + 25);
+                            return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() + owner->GetAura(SPELL_HUNTER_ASPECT_EAGLE)->GetEffect(EFFECT_0)->GetAmount());
                     }
                 return false;
             }
@@ -1438,7 +1407,6 @@ class spell_hun_volley : public SpellScriptLoader
 
             void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
-                std::cout << "Hola que as por mas\n";
                 GetTarget()->SetPower(POWER_FOCUS, GetTarget()->GetPower(POWER_FOCUS) - aurEff->GetAmount());
             }
 

@@ -2855,9 +2855,11 @@ void Unit::_UpdateAutoRepeatSpell()
     if (isAttackReady(RANGED_ATTACK))
     {
         // Check if able to cast
-        if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckCast(true) != SPELL_CAST_OK)
+        SpellCastResult result = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckCast(true);
+        if (result != SPELL_CAST_OK)
         {
-            InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75)
+                InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             return;
         }
 
