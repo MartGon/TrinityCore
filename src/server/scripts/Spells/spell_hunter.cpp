@@ -32,12 +32,9 @@
 
 enum HunterSpells
 {
-<<<<<<< HEAD
     SPELL_HUNTER_ANIMAL_INSTINCTS                   = 204315,
     SPELL_HUNTER_ASPECT_BEAST                       = 191384,
-=======
     SPELL_HUNTER_ARCANE_SHOT_FOCUS                  = 187675,
->>>>>>> arcane_shot
     SPELL_HUNTER_ASPECT_CHEETAH_SLOW                = 186258,
     SPELL_HUNTER_ASPECT_EAGLE                       = 186289,
     SPELL_HUNTER_ASPECT_EAGLE_PET                   = 231555,
@@ -61,14 +58,12 @@ enum HunterSpells
     SPELL_HUNTER_IMPROVED_MEND_PET                  = 24406,
     SPELL_HUNTER_INSANITY                           = 95809,
     SPELL_HUNTER_LOCK_AND_LOAD                      = 56453,
+    SPELL_HUNTER_LONE_WOLF                          = 155228,
     SPELL_HUNTER_MASTERS_CALL_TRIGGERED             = 62305,
     SPELL_HUNTER_MISDIRECTION_PROC                  = 35079,
-<<<<<<< HEAD
     SPELL_HUNTER_MONGOOSE_BITE                      = 190928,
     SPELL_HUNTER_MONGOOSE_FURY                      = 190931,
-=======
     SPELL_HUNTER_MULTI_SHOT_FOCUS                   = 213363,
->>>>>>> arcane_shot
     SPELL_HUNTER_PET_LAST_STAND_TRIGGERED           = 53479,
     SPELL_HUNTER_PET_HEART_OF_THE_PHOENIX           = 55709,
     SPELL_HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED = 54114,
@@ -607,6 +602,39 @@ class spell_hun_hunting_companion : public SpellScriptLoader
         AuraScript* GetAuraScript() const override
         {
             return new spell_hun_hunting_companion_AuraScript();
+        }
+};
+
+// 109304 - Exhilaration
+class spell_hun_exhilaration : public SpellScriptLoader
+{
+    public:
+        spell_hun_exhilaration() : SpellScriptLoader("spell_hun_exhilaration") { }
+
+        class spell_hun_exhilaration_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hun_exhilaration_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/) override
+            {
+                return ValidateSpellInfo({ SPELL_HUNTER_EXHILARATION_R2, SPELL_HUNTER_LONE_WOLF });
+            }
+
+            void HandleOnHit()
+            {
+                if (GetCaster()->HasAura(SPELL_HUNTER_EXHILARATION_R2) && !GetCaster()->HasAura(SPELL_HUNTER_LONE_WOLF))
+                    GetCaster()->CastSpell((Unit*)nullptr, SPELL_HUNTER_EXHILARATION_PET, true);
+            }
+
+            void Register() override
+            {
+                OnHit += SpellHitFn(spell_hun_exhilaration_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_hun_exhilaration_SpellScript();
         }
 };
 
@@ -1439,22 +1467,19 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_aspect_eagle();
     new spell_hun_chimera_shot();
     new spell_hun_cobra_shot();
-    new spell_hun_disengage();
     new spell_hun_flanking_strike();
     new spell_hun_flanking_strike_pet();
     new spell_hun_hunting_companion();
     new spell_hun_hunting_companion_gain_charge();
+    new spell_hun_exhilaration();
     new spell_hun_hunting_party();
     new spell_hun_improved_mend_pet();
     new spell_hun_last_stand_pet();
     new spell_hun_masters_call();
     new spell_hun_misdirection();
     new spell_hun_misdirection_proc();
-<<<<<<< HEAD
-    new spell_hun_mongoose_bite();
-=======
-    new spell_hun_multi_shot();
->>>>>>> arcane_shot
+    //new spell_hun_mongoose_bite();
+    //new spell_hun_multi_shot();
     new spell_hun_pet_carrion_feeder();
     new spell_hun_pet_heart_of_the_phoenix();
     new spell_hun_readiness();
