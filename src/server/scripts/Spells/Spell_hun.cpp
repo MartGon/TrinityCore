@@ -75,6 +75,7 @@ enum HunterSpells
     SPELL_HUNTER_STEADY_FOCUS           = 193534,
     SPELL_HUNTER_STICKY_BOMB_EXPLOSION  = 191244,
     SPELL_HUNTER_TAR_TRAP_AREA2         = 187700,
+    SPELL_HUNTER_TAR_TRAP_SLOW          = 135299,
     SPELL_HUNTER_TAR_TRAP_SLOW_WL       = 236699, // WL - WayLay
     SPELL_HUNTER_THRILL_OF_THE_HUNT     = 34720,
     SPELL_HUNTER_THROWING_AXES          = 200167,
@@ -1163,8 +1164,7 @@ public:
             {
                 if (caster->IsValidAttackTarget(unit))
                 {
-                    caster->CastSpell(unit, 135299, true);
-                    //at->SetDuration(0);
+                    caster->CastSpell(unit, SPELL_HUNTER_TAR_TRAP_SLOW, true);
                 }
             }
         }
@@ -1175,8 +1175,7 @@ public:
             {
                 if (caster->IsValidAttackTarget(unit))
                 {
-                    unit->RemoveAurasDueToSpell(135299);
-                    //at->SetDuration(0);
+                    unit->RemoveAurasDueToSpell(SPELL_HUNTER_TAR_TRAP_SLOW);
                 }
             }
         }
@@ -1293,12 +1292,7 @@ void AddSC_spell_hun_steady_focus()
     new spell_hun_camouflage();
     new spell_hun_harpoon();
     new spell_hun_mongoose_bite();
-    //new spell_hun_flanking_strike();
-    //new spell_hun_flanking_strike_pet();
     new spell_hun_moknathal_talent();
-    //new spell_hun_hunting_companion_gain_charge();
-    //new spell_hun_hunting_companion();
-    //new spell_hun_aspect_eagle();
     new spell_hun_throwing_axes();
     new spell_hun_mortal_wounds();
     new spell_hun_murder_crows();

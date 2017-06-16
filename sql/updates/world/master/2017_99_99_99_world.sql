@@ -78,6 +78,15 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 DELETE FROM `spell_script_names` WHERE `entry`=201078;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(201078,"spell_hun_snake_hunter");
 
+-- 162496 Steel Trap
+DELETE FROM `areatrigger_template` WHERE `Id`=3161;
+INSERT INTO `areatrigger_template` (`Id`, `Type`, `Flags`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `ScriptName`, `VerifiedBuild`) VALUES
+(3161, 0, 0, 3, 3, 0, 0, 0, 0, "areatrigger_hun_steel_trap", 23911);
+
+DELETE FROM `spell_areatrigger` WHERE `SpellMiscId`=3160;
+INSERT INTO `spell_areatrigger` (`SpellMiscId`, `AreaTriggerId`, `MoveCurveId`, `ScaleCurveId`, `MorphCurveId`, `FacingCurveId`, `DecalPropertiesId`, `TimeToTarget`, `TimeToTargetScale`, `VerifiedBuild`) VALUES
+(2392, 3160, 0, 0, 0, 0, 0, 0, 60000, 23911);
+
 -- 191241 Sticky Bomb
 DELETE FROM `spell_script_names` WHERE `entry`=191241;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(191241,"spell_hun_sticky_bomb");
@@ -90,3 +99,12 @@ INSERT INTO `areatrigger_template` (`Id`, `Type`, `Flags`, `Data0`, `Data1`, `Da
 DELETE FROM `spell_areatrigger` WHERE `SpellMiscId`=3159;
 INSERT INTO `spell_areatrigger` (`SpellMiscId`, `AreaTriggerId`, `MoveCurveId`, `ScaleCurveId`, `MorphCurveId`, `FacingCurveId`, `DecalPropertiesId`, `TimeToTarget`, `TimeToTargetScale`, `VerifiedBuild`) VALUES
 (4435, 3159, 0, 0, 0, 0, 0, 0, 60000, 23911);
+
+-- 187700 Tar trap second areatrigger
+DELETE FROM `areatrigger_template` WHERE `Id`=3160;
+INSERT INTO `areatrigger_template` (`Id`, `Type`, `Flags`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `ScriptName`, `VerifiedBuild`) VALUES
+(3160, 0, 0, 5, 5, 0, 0, 0, 0, "areatrigger_hun_tar_trap_pool", 23911);
+
+DELETE FROM `spell_areatrigger` WHERE `SpellMiscId`=3160;
+INSERT INTO `spell_areatrigger` (`SpellMiscId`, `AreaTriggerId`, `MoveCurveId`, `ScaleCurveId`, `MorphCurveId`, `FacingCurveId`, `DecalPropertiesId`, `TimeToTarget`, `TimeToTargetScale`, `VerifiedBuild`) VALUES
+(4436, 3160, 0, 0, 0, 0, 0, 0, 30000, 23911);
