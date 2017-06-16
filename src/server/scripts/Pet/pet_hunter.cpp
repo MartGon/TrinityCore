@@ -21,15 +21,15 @@
  */
 
 #include "ScriptMgr.h"
-#include "CreatureAIImpl.h"
 #include "ScriptedCreature.h"
-#include "TemporarySummon.h"
 
 enum HunterSpells
 {
     SPELL_HUNTER_CRIPPLING_POISON       = 30981, // Viper
     SPELL_HUNTER_DEADLY_POISON_PASSIVE  = 34657, // Venomous Snake
-    SPELL_HUNTER_MIND_NUMBING_POISON    = 25810  // Viper
+    SPELL_HUNTER_MIND_NUMBING_POISON    = 25810,  // Viper
+    SPELL_HUNTER_COBRA_SPIT             = 206685, // Cobra Spit
+    SPELL_HUNTER_COBRA_AURA             = 194407 // Focus regn Aura
 };
 
 enum HunterCreatures
@@ -141,7 +141,104 @@ class npc_pet_hunter_snake_trap : public CreatureScript
         }
 };
 
+class npc_pet_hunter_spitting_cobra : public CreatureScript
+{
+    public:
+        npc_pet_hunter_spitting_cobra() : CreatureScript("npc_pet_hunter_spitting_cobra") { }
+
+        struct npc_pet_hunter_spitting_cobraAI : CasterAI
+        {
+            npc_pet_hunter_spitting_cobraAI(Creature* creature) : CasterAI(creature) { }
+
+            void InitializeAI() override
+            {
+                CasterAI::InitializeAI();
+            
+                if(Unit* Owner = me->GetOwner())
+                    if(Owner->GetVictim())
+                        AttackStart(Owner->GetVictim());
+
+            }
+
+            void JustDied(Unit* /*killer*/) override
+            {
+                // Stop Feeding Gargoyle when it dies
+                if (Unit* owner = me->GetOwner())
+                    owner->RemoveAurasDueToSpell(SPELL_HUNTER_COBRA_AURA);
+            }
+
+            void UpdateAI(uint32 diff) override
+            {
+                if (!UpdateVictim() || !me->GetVictim()) 
+                {
+                    if (Unit* Owner = me->GetOwner())
+                        if (Owner->GetVictim())
+                            AttackStart(Owner->GetVictim());
+                        else
+                            return;
+                }
+                
+
+                if (me->EnsureVictim()->HasBreakableByDamageCrowdControlAura(me))
+                {
+                    me->InterruptNonMeleeSpells(false);
+                    return;
+                }
+
+                if (_spellTimer <= diff)
+                {
+                        DoCastVictim(SPELL_HUNTER_COBRA_SPIT);
+
+                    _spellTimer = 2000;
+                }
+                else
+                    _spellTimer -= diff;
+            
+                DoMeleeAttackIfReady();
+            }
+
+        private:
+            bool _isViper;
+            uint32 _spellTimer;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const override
+        {
+            return new npc_pet_hunter_spitting_cobraAI(creature);
+        }
+};
+
+class spell_hun_cobra_spit : public SpellScriptLoader
+{
+    public:
+        spell_hun_cobra_spit() : SpellScriptLoader("spell_hun_cobra_spit") { }
+
+        class spell_hun_cobra_spit_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hun_cobra_spit_SpellScript);
+
+            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* Owner = GetCaster()->GetOwner())
+                    SetHitDamage(Owner->GetTotalAttackPowerValue(BASE_ATTACK) *1.1);
+            }
+
+            void Register() override
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_hun_cobra_spit_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_hun_cobra_spit_SpellScript();
+        }
+};
+
 void AddSC_hunter_pet_scripts()
 {
     new npc_pet_hunter_snake_trap();
+    new npc_pet_hunter_spitting_cobra();
+    new spell_hun_cobra_spit();
 }

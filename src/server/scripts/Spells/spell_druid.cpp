@@ -28,6 +28,7 @@
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include <iostream>
 
 enum DruidSpells
 {

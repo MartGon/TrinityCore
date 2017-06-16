@@ -20,48 +20,57 @@
 #include "Unit.h"
 #include "UpdateData.h"
 #include "AreaTriggerAI.h"
-
+#include <stdio.h>
+#include <iostream>
+#include "SpellAuraEffects.h"
+#include "SpellMgr.cpp"
+#include "ScriptMgr.h"
+#include "CellImpl.h"
+#include "GridNotifiersImpl.h"
+#include "Pet.h"
+#include "SpellAuraEffects.h"
+#include "SpellHistory.h"
+#include "SpellMgr.h"
+#include "SpellScript.h"
 
 enum HunterSpells
 {
-    SPELL_HUNTER_ARCANE_SHOT = 185358,
-    SPELL_HUNTER_BOMBARDMENT_TALENT = 35110,
-    SPELL_HUNTER_BOMBARDMENT_SPELL = 82921,
-    SPELL_HUNTER_MULTISHOT = 2643,
-    SPELL_HUNTER_STEADY_FOCUS = 193534,
-    SPELL_AUTO_SHOT = 75,
-    SPELL_HUNTER_FLARE = 1543,
-    SPELL_HUNTER_FLARE_AREA_TRIGGER = 132950,
-    SPELL_HUNTER_FLARE_AURA = 140691,
-    SPELL_HUNTER_FREEZING_TRAP= 187650,
-    SPELL_HUNTER_FREEZING_TRAP_AREA_TRIGGER= 187651,
-    SPELL_HUNTER_FREEZING_TRAP_AURA= 3355,/*55041*/
-    SPELL_HUNTER_THRILL_OF_THE_HUNT = 34720,
-    SPELL_HUNTER_CAMOUFLAGE_AURA = 199483,
-    SPELL_HUNTER_ASPECT_CHEETAH_FAST=186257,
-    SPELL_HUNTER_ASPECT_CHEETAH_SLOW=186258,
-    SPELL_HUNTER_HARPOON_JUMP=57604,
-    SPELL_HUNTER_HARPOON=190925,
-    SPELL_HUNTER_HARPOON_ROOT=190927,
-    SPELL_HUNTER_POSTHASTE=109215,
-    SPELL_HUNTER_POSTHASTE_BUFF=118922,
-    SPELL_HUNTER_MONGOOSE_BITE=190928,
-    SPELL_HUNTER_MONGOOSE_FURY=190931,
-    SPELL_HUNTER_FLANKING_STRIKE=202800,
-    SPELL_HUNTER_FLANKING_STRIKE_MASTER=205434,
-    SPELL_HUNTER_FLANKING_STRIKE_PET=204740,
-    SPELL_HUNTER_MOKNATHAL_TALENT = 201082,
-    SPELL_HUNTER_MOKNATHAL_AURA = 201081,
-    SPELL_HUNTER_RAPTOR_STRIKE = 186270,
+    SPELL_HUNTER_ANIMAL_INSTINCTS       = 204315,
+    SPELL_HUNTER_ARCANE_SHOT            = 185358,
+    SPELL_HUNTER_ASPECT_EAGLE           = 186289,
+    SPELL_HUNTER_AUTO_SHOT              = 75,
+    SPELL_HUNTER_BOMBARDMENT_TALENT     = 35110,
+    SPELL_HUNTER_BOMBARDMENT_SPELL      = 82921,
+    SPELL_HUNTER_CAMOUFLAGE_AURA        = 199483,
     SPELL_HUNTER_HUNTING_COMPANION_MASTERY = 191334,
     SPELL_HUNTER_HUNTING_COMPANION_GAIN_CHARGE = 191335,
     SPELL_HUNTER_HUNTING_COMPANION_AURA = 191336,
-    SPELL_HUNTER_ASPECT_EAGLE = 186289,
-    SPELL_HUNTER_ANIMAL_INSTINCTS = 204315,
-    SPELL_HUNTER_THROWING_AXES = 200167,
-    SPELL_HUNTER_MORTAL_WOUNDS_AURA = 201075,
-    SPELL_HUNTER_MURDER_CROWS = 189682,
-    SPELL_HUNTER_SERPENT_STING = 87935
+    SPELL_HUNTER_FLANKING_STRIKE         = 202800,
+    SPELL_HUNTER_FLANKING_STRIKE_MASTER = 205434,
+    SPELL_HUNTER_FLANKING_STRIKE_PET    = 204740,
+    SPELL_HUNTER_FLARE                  = 1543,
+    SPELL_HUNTER_FLARE_AREA_TRIGGER     = 132950,
+    SPELL_HUNTER_FLARE_AURA             = 140691,
+    SPELL_HUNTER_FREEZING_TRAP          = 187650,
+    SPELL_HUNTER_FREEZING_TRAP_AREA_TRIGGER= 187651,
+    SPELL_HUNTER_FREEZING_TRAP_AURA     = 3355,/*55041*/
+    SPELL_HUNTER_HARPOON_JUMP           = 57604,
+    SPELL_HUNTER_HARPOON                = 190925,
+    SPELL_HUNTER_HARPOON_ROOT           = 190927,
+    SPELL_HUNTER_MOKNATHAL_TALENT       = 201082,
+    SPELL_HUNTER_MOKNATHAL_AURA         = 201081,
+    SPELL_HUNTER_MONGOOSE_BITE          = 190928,
+    SPELL_HUNTER_MONGOOSE_FURY          = 190931,
+    SPELL_HUNTER_MORTAL_WOUNDS_AURA     = 201075,
+    SPELL_HUNTER_MULTISHOT              = 2643,
+    SPELL_HUNTER_MURDER_CROWS           = 189682,
+    SPELL_HUNTER_POSTHASTE              = 109215,
+    SPELL_HUNTER_POSTHASTE_BUFF         = 118922,
+    SPELL_HUNTER_RAPTOR_STRIKE          = 186270,
+    SPELL_HUNTER_SERPENT_STING          = 87935,
+    SPELL_HUNTER_STEADY_FOCUS           = 193534,
+    SPELL_HUNTER_THRILL_OF_THE_HUNT     = 34720,
+    SPELL_HUNTER_THROWING_AXES          = 200167
 };
 
     // Steady Focus 193553
@@ -639,45 +648,6 @@ class spell_hun_moknathal_talent : public SpellScriptLoader
         }
 };
 
-class spell_hun_aspect_cheetah : public SpellScriptLoader
-{
-    public:
-        spell_hun_aspect_cheetah() : SpellScriptLoader("spell_hun_aspect_cheetah") { }
-
-        class spell_hun_aspect_cheetah_AuraScript : public AuraScript
-        {
-
-            PrepareAuraScript(spell_hun_aspect_cheetah_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                return ValidateSpellInfo
-                ({
-                    SPELL_HUNTER_ASPECT_CHEETAH_SLOW
-                });
-            }
-
-            void HandleOnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit *target = GetTarget();
-                if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
-                    target->CastSpell(target, SPELL_HUNTER_ASPECT_CHEETAH_SLOW, true);
-            }
-
-
-            void Register() override
-            {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_hun_aspect_cheetah_AuraScript::HandleOnRemove, EFFECT_0, SPELL_AURA_MOD_INCREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
-            }
-
-        };
-
-        AuraScript* GetAuraScript() const override
-        {
-            return new spell_hun_aspect_cheetah_AuraScript();
-        }
-};
-
 class spell_hun_hunting_companion_gain_charge : public SpellScriptLoader
 {
     public:
@@ -1123,7 +1093,6 @@ class areatrigger_hun_explosive_trap : public AreaTriggerEntityScript
                     {
                         Position pos = at->GetPosition();
                         caster->CastSpell(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(), 13812, true); //daño
-                        std::cout << "Tiempo desde creacion " << at->GetTimeSinceCreated() << "\n";
                         if(caster->HasAura(234955) && at->GetTimeSinceCreated()>2000)
                             caster->CastSpell(unit, 237338, true); //cegar
                         at->SetDuration(0);
@@ -1298,7 +1267,7 @@ class spell_hun_trail_blazer : public SpellScriptLoader
         }
 };
 
-
+// TrailBlazer 199921
 class spell_hun_trailbazer : public PlayerScript
 {
 public:
@@ -1310,7 +1279,6 @@ public:
 
         void UpdateAI(uint32 diff) override
         {
-            std::cout << "Digo Holaaaa\n";
         }
         
     };
@@ -1319,6 +1287,7 @@ public:
 
 void AddSC_spell_hun_steady_focus()
 {
+    
     new spell_hun_steady_focus();
     new spell_hun_bombardment();
     new spell_hun_flare_trigger();
@@ -1327,13 +1296,12 @@ void AddSC_spell_hun_steady_focus()
     new spell_hun_camouflage();
     new spell_hun_harpoon();
     new spell_hun_mongoose_bite();
-    new spell_hun_flanking_strike();
-    new spell_hun_flanking_strike_pet();
-    new spell_hun_aspect_cheetah();
+    //new spell_hun_flanking_strike();
+    //new spell_hun_flanking_strike_pet();
     new spell_hun_moknathal_talent();
-    new spell_hun_hunting_companion_gain_charge();
-    new spell_hun_hunting_companion();
-    new spell_hun_aspect_eagle();
+    //new spell_hun_hunting_companion_gain_charge();
+    //new spell_hun_hunting_companion();
+    //new spell_hun_aspect_eagle();
     new spell_hun_throwing_axes();
     new spell_hun_mortal_wounds();
     new spell_hun_murder_crows();

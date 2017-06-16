@@ -871,8 +871,6 @@ class spell_hun_misdirection_proc : public SpellScriptLoader
         }
 };
 
-
-
 // 54044 - Pet Carrion Feeder
 class spell_hun_pet_carrion_feeder : public SpellScriptLoader
 {
@@ -1422,42 +1420,6 @@ class spell_hun_volley : public SpellScriptLoader
         }
 };
 
-// 109304 - Exhilaration
-class spell_hun_exhilaration : public SpellScriptLoader
-{
-    public:
-        spell_hun_exhilaration() : SpellScriptLoader("spell_hun_exhilaration") { }
-
-        class spell_hun_exhilaration_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_hun_exhilaration_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                return ValidateSpellInfo
-                ({
-                    SPELL_HUNTER_EXHILARATION_R2
-                });
-            }
-
-            void HandleOnHit()
-            {
-                if(GetCaster()->HasAura(SPELL_HUNTER_EXHILARATION_R2))
-                    if(Unit* pet = GetCaster()->GetGuardianPet())
-                        GetCaster()->CastSpell(pet, SPELL_HUNTER_EXHILARATION_PET, true);
-            }
-
-            void Register() override
-            {
-                OnHit += SpellHitFn(spell_hun_exhilaration_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_hun_exhilaration_SpellScript();
-        }
-};
 
 void AddSC_hunter_spell_scripts()
 {
@@ -1493,5 +1455,4 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_t9_4p_bonus();
     new spell_hun_tnt();
     new spell_hun_volley();
-    new spell_hun_exhilaration();
 }
