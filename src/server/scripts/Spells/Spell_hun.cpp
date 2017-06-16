@@ -42,6 +42,7 @@ enum HunterSpells
     SPELL_HUNTER_BOMBARDMENT_TALENT     = 35110,
     SPELL_HUNTER_BOMBARDMENT_SPELL      = 82921,
     SPELL_HUNTER_CAMOUFLAGE_AURA        = 199483,
+    SPELL_HUNTER_CALTROPS_DAMAGE        = 194279,
     SPELL_HUNTER_HUNTING_COMPANION_MASTERY = 191334,
     SPELL_HUNTER_HUNTING_COMPANION_GAIN_CHARGE = 191335,
     SPELL_HUNTER_HUNTING_COMPANION_AURA = 191336,
@@ -54,6 +55,8 @@ enum HunterSpells
     SPELL_HUNTER_FREEZING_TRAP          = 187650,
     SPELL_HUNTER_FREEZING_TRAP_AREA_TRIGGER= 187651,
     SPELL_HUNTER_FREEZING_TRAP_AURA     = 3355,/*55041*/
+    SPELL_HUNTER_EXPLOSIVE_TRAP_DMG     = 13812,
+    SPELL_HUNTER_EXPLOSIVE_TRAP_BLIND   = 237338,
     SPELL_HUNTER_HARPOON_JUMP           = 57604,
     SPELL_HUNTER_HARPOON                = 190925,
     SPELL_HUNTER_HARPOON_ROOT           = 190927,
@@ -63,14 +66,19 @@ enum HunterSpells
     SPELL_HUNTER_MONGOOSE_FURY          = 190931,
     SPELL_HUNTER_MORTAL_WOUNDS_AURA     = 201075,
     SPELL_HUNTER_MULTISHOT              = 2643,
-    SPELL_HUNTER_MURDER_CROWS           = 189682,
+    SPELL_HUNTER_MURDER_CROWS_DAMAGE    = 131900,
     SPELL_HUNTER_POSTHASTE              = 109215,
     SPELL_HUNTER_POSTHASTE_BUFF         = 118922,
     SPELL_HUNTER_RAPTOR_STRIKE          = 186270,
     SPELL_HUNTER_SERPENT_STING          = 87935,
+    SPELL_HUNTER_SERPENT_STING_AURA     = 118253,
     SPELL_HUNTER_STEADY_FOCUS           = 193534,
+    SPELL_HUNTER_STICKY_BOMB_EXPLOSION  = 191244,
+    SPELL_HUNTER_TAR_TRAP_AREA2         = 187700,
+    SPELL_HUNTER_TAR_TRAP_SLOW_WL       = 236699, // WL - WayLay
     SPELL_HUNTER_THRILL_OF_THE_HUNT     = 34720,
-    SPELL_HUNTER_THROWING_AXES          = 200167
+    SPELL_HUNTER_THROWING_AXES          = 200167,
+    SPELL_HUNTER_WAYLAY                 = 234955
 };
 
     // Steady Focus 193553
@@ -511,7 +519,6 @@ class spell_hun_flanking_strike : public SpellScriptLoader
                     Pet *pet = GetCaster()->ToPlayer()->GetPet();
 
                     uint16 spec=GetCaster()->GetGuardianPet()->ToPet()->GetSpecialization();
-                    std::cout << "La spec es " << spec << "\n";
                     // tenacity = 81
                     // cunning = 79
                     // ferocity = 74
@@ -806,9 +813,7 @@ class spell_hun_throwing_axes : public SpellScriptLoader
 
             void OnCaste()
             {
-               // GetCaster()->setcurr
-                GetCaster()->CastSpell(GetExplTargetUnit(), SPELL_HUNTER_THROWING_AXES);
-               // GetCaster()->CastSpell(GetExplTargetUnit(), 193265);
+               GetCaster()->CastSpell(GetExplTargetUnit(), SPELL_HUNTER_THROWING_AXES);
                GetCaster()->CastSpell(GetExplTargetUnit(), SPELL_HUNTER_THROWING_AXES);
                GetCaster()->CastSpell(GetExplTargetUnit(), SPELL_HUNTER_THROWING_AXES);
             }
@@ -819,8 +824,6 @@ class spell_hun_throwing_axes : public SpellScriptLoader
 
             void Register() override
             {
-                //OnCheckCast += SpellCheckCastFn(spell_hun_throwing_axes_SpellScript::CheckCast);
-                //OnEffectHitTarget += SpellEffectFn(spell_hun_throwing_axes_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
                 OnCast += SpellCastFn(spell_hun_throwing_axes_SpellScript::OnCaste);
             }
 
@@ -844,7 +847,6 @@ class spell_hun_mortal_wounds : public SpellScriptLoader
 
             void OnCaste()
             {
-                std::cout << "me active  \n";
                 Unit *caster = GetCaster();
                     if (Aura *aura = caster->GetAura(SPELL_HUNTER_MORTAL_WOUNDS_AURA))
                         caster->GetSpellHistory()->RestoreCharge(sSpellMgr->GetSpellInfo(SPELL_HUNTER_MONGOOSE_BITE)->ChargeCategoryId);
@@ -852,10 +854,8 @@ class spell_hun_mortal_wounds : public SpellScriptLoader
 
             void Register() override
             {
-
                 OnCast += SpellCastFn(spell_hun_mortal_wounds_SpellScript::OnCaste);
             }
-
         };
 
         SpellScript* GetSpellScript() const override
@@ -876,7 +876,7 @@ class spell_hun_murder_crows : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_MURDER_CROWS))
+                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_MURDER_CROWS_DAMAGE))
                     return false;
                 return true;
             }
@@ -884,14 +884,14 @@ class spell_hun_murder_crows : public SpellScriptLoader
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 if(Unit* caster = GetCaster())
-                    caster->CastSpell(GetTarget(), 131900, true);
+                    caster->CastSpell(GetTarget(), SPELL_HUNTER_MURDER_CROWS_DAMAGE, true);
             }
 
             void HandleOnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit *target = GetTarget();
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
-                    GetCaster()->GetSpellHistory()->ResetCooldown(206505, true);
+                    GetCaster()->GetSpellHistory()->ResetCooldown(GetSpellInfo()->Id, true);
             }
 
 
@@ -921,8 +921,8 @@ class spell_hun_carve : public SpellScriptLoader
             void HandleAfterHit()
             {
                 Unit *caster = GetCaster();
-                if (caster->HasSpell(87935))
-                    caster->CastSpell(GetHitUnit(), 118253, true);
+                if (caster->HasSpell(SPELL_HUNTER_SERPENT_STING))
+                    caster->CastSpell(GetHitUnit(), SPELL_HUNTER_SERPENT_STING_AURA, true);
             }
 
             void Register() override
@@ -1015,7 +1015,7 @@ class spell_hun_sticky_bomb : public SpellScriptLoader
             {
                 Unit *target = GetTarget();
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
-                    GetCaster()->CastSpell(GetTarget()->GetPosition().GetPositionX(), GetTarget()->GetPosition().GetPositionY(), GetTarget()->GetPosition().GetPositionZ(), 191244, true);
+                    GetCaster()->CastSpell(GetTarget()->GetPosition().GetPositionX(), GetTarget()->GetPosition().GetPositionY(), GetTarget()->GetPosition().GetPositionZ(), SPELL_HUNTER_STICKY_BOMB_EXPLOSION, true);
             }
 
 
@@ -1049,8 +1049,7 @@ class areatrigger_hun_caltrops : public AreaTriggerEntityScript
                 {
                     if (caster->IsValidAttackTarget(unit))
                     {
-                        caster->CastSpell(unit, 194279, true);
-                        //at->SetDuration(0);
+                        caster->CastSpell(unit, SPELL_HUNTER_CALTROPS_DAMAGE, true);
                     }
                 }
             }
@@ -1060,9 +1059,8 @@ class areatrigger_hun_caltrops : public AreaTriggerEntityScript
                 for (ObjectGuid const& exitUnitGuid : at->GetInsideUnits())
                 {
                     if (Unit* unit = ObjectAccessor::GetUnit(*at, exitUnitGuid))
-                        //if (Player* player = unit->ToPlayer())
-                            if(!unit->HasAura(194279) && at->GetCaster()->IsValidAttackTarget(unit))
-                                at->GetCaster()->CastSpell(unit, 194279, true);
+                            if(!unit->HasAura(SPELL_HUNTER_CALTROPS_DAMAGE) && at->GetCaster()->IsValidAttackTarget(unit))
+                                at->GetCaster()->CastSpell(unit, SPELL_HUNTER_CALTROPS_DAMAGE, true);
                }
             }
         };
@@ -1092,9 +1090,9 @@ class areatrigger_hun_explosive_trap : public AreaTriggerEntityScript
                     if (caster->IsValidAttackTarget(unit))
                     {
                         Position pos = at->GetPosition();
-                        caster->CastSpell(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(), 13812, true); //daño
-                        if(caster->HasAura(234955) && at->GetTimeSinceCreated()>2000)
-                            caster->CastSpell(unit, 237338, true); //cegar
+                        caster->CastSpell(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(), SPELL_HUNTER_EXPLOSIVE_TRAP_DMG, true); //daño
+                        if(caster->HasAura(SPELL_HUNTER_WAYLAY) && at->GetTimeSinceCreated()>2000)
+                            caster->CastSpell(unit, SPELL_HUNTER_EXPLOSIVE_TRAP_BLIND, true); //cegar
                         at->SetDuration(0);
                     }
                 }
@@ -1129,17 +1127,16 @@ public:
             {
                 if (caster->IsValidAttackTarget(unit))
                 {
-                    caster->CastSpell(at->GetPositionX(),at->GetPositionY(),at->GetPositionZ(), 187700, true);
+                    caster->CastSpell(at->GetPositionX(),at->GetPositionY(),at->GetPositionZ(), SPELL_HUNTER_TAR_TRAP_AREA2, true);
                     if (caster->IsValidAttackTarget(unit))
                     {
-                        if (caster->HasAura(234955) && at->GetTimeSinceCreated()>2000)
-                            caster->CastSpell(unit, 236699, true); //spuer pegajoso 
+                        if (caster->HasAura(SPELL_HUNTER_WAYLAY) && at->GetTimeSinceCreated()>2000)
+                            caster->CastSpell(unit, SPELL_HUNTER_TAR_TRAP_SLOW_WL, true); //spuer pegajoso 
                     }
                     at->SetDuration(0);
                 }
             }
         }
-
     };
 
     AreaTriggerAI* GetAI(AreaTrigger* areatrigger) const override
