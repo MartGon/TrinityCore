@@ -52,7 +52,6 @@ enum HunterSpells
     SPELL_HUNTER_FLANKING_STRIKE_PET                = 204740,
     SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS             = 91954,
     SPELL_HUNTER_HARPOON                            = 190925,
-    SPELL_HUNTER_HUNTING_COMPANION_MASTERY          = 191334,
     SPELL_HUNTER_HUNTING_COMPANION_GAIN_CHARGE      = 191335,
     SPELL_HUNTER_HUNTING_COMPANION_AURA             = 191336,
     SPELL_HUNTER_IMPROVED_MEND_PET                  = 24406,
@@ -498,110 +497,6 @@ class spell_hun_flanking_strike_pet : public SpellScriptLoader
         SpellScript* GetSpellScript() const override
         {
             return new spell_hun_flanking_strike_pet_SpellScript();
-        }
-};
-
-// 191335 - Hunting Companion (gain charge)
-class spell_hun_hunting_companion_gain_charge : public SpellScriptLoader
-{
-    public:
-        spell_hun_hunting_companion_gain_charge() : SpellScriptLoader("spell_hun_hunting_companion_gain_charge") { }
-
-        class spell_hun_hunting_companion_gain_charge_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_hun_hunting_companion_gain_charge_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                return ValidateSpellInfo
-                ({
-                    SPELL_HUNTER_HUNTING_COMPANION_AURA,
-                    SPELL_HUNTER_MONGOOSE_BITE  
-                });
-            }
-
-            void OnCaste()
-            {
-                Unit *caster = GetCaster();
-                if (Unit *owner = GetCaster()->GetOwner())
-                    if (caster->HasAura(SPELL_HUNTER_HUNTING_COMPANION_AURA))
-                        owner->GetSpellHistory()->RestoreCharge(sSpellMgr->GetSpellInfo(SPELL_HUNTER_MONGOOSE_BITE)->ChargeCategoryId);
-            }
-
-            void Register() override
-            {
-                OnCast += SpellCastFn(spell_hun_hunting_companion_gain_charge_SpellScript::OnCaste);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_hun_hunting_companion_gain_charge_SpellScript();
-        }
-};
-
-// 191336 - Hunting Companion (Pet Aura)
-class spell_hun_hunting_companion : public SpellScriptLoader
-{
-    public:
-        spell_hun_hunting_companion() : SpellScriptLoader("spell_hun_hunting_companion") { }
-
-        class spell_hun_hunting_companion_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_hun_hunting_companion_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                return ValidateSpellInfo
-                ({
-                    SPELL_HUNTER_ASPECT_EAGLE,
-                    SPELL_HUNTER_FLANKING_STRIKE_PET,
-                    SPELL_HUNTER_FLANKING_STRIKE_R2,
-                    SPELL_HUNTER_HUNTING_COMPANION_MASTERY 
-                });
-            }
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                if (Unit *owner = GetTarget()->GetOwner())
-                    if (Aura *mast = owner->GetAura(SPELL_HUNTER_HUNTING_COMPANION_MASTERY))
-                    {
-                        if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
-                        {
-                            if (spellInfo->Id == SPELL_HUNTER_FLANKING_STRIKE_PET)
-                            {
-                                if (GetTarget()->HasAura(SPELL_HUNTER_ASPECT_EAGLE))
-                                {
-                                    // Aspect of the Eagle + Flanking strike;
-                                    if (owner->HasAura(SPELL_HUNTER_FLANKING_STRIKE_R2))
-                                        return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() * 2 + owner->GetAura(SPELL_HUNTER_ASPECT_EAGLE)->GetEffect(EFFECT_0)->GetAmount());
-                                    else
-                                        return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() + owner->GetAura(SPELL_HUNTER_ASPECT_EAGLE)->GetEffect(EFFECT_0)->GetAmount());
-                                }
-                                    // Flanking Strike
-                                if (owner->HasAura(SPELL_HUNTER_FLANKING_STRIKE_R2))
-                                    return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() * 2);
-                                else
-                                    return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount());
-                            }
-                                    // Basic Attack
-                            return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount());
-                        }
-                        if (GetTarget()->HasAura(SPELL_HUNTER_ASPECT_EAGLE))   // Aspect of the Eagle 
-                            return roll_chance_f(mast->GetEffect(EFFECT_0)->GetAmount() + owner->GetAura(SPELL_HUNTER_ASPECT_EAGLE)->GetEffect(EFFECT_0)->GetAmount());
-                    }
-                return false;
-            }
-
-            void Register() override
-            {
-                DoCheckProc += AuraCheckProcFn(spell_hun_hunting_companion_AuraScript::CheckProc);
-            }
-        };
-
-        AuraScript* GetAuraScript() const override
-        {
-            return new spell_hun_hunting_companion_AuraScript();
         }
 };
 
@@ -1431,8 +1326,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_cobra_shot();
     new spell_hun_flanking_strike();
     new spell_hun_flanking_strike_pet();
-    new spell_hun_hunting_companion();
-    new spell_hun_hunting_companion_gain_charge();
     new spell_hun_exhilaration();
     new spell_hun_hunting_party();
     new spell_hun_improved_mend_pet();
