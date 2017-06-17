@@ -21,7 +21,12 @@
  */
 
 #include "ScriptMgr.h"
+#include "CellImpl.h"
+#include "CombatAI.h"
+#include "GridNotifiersImpl.h"
+#include "MotionMaster.h"
 #include "ScriptedCreature.h"
+#include "SpellInfo.h"
 
 enum HunterSpells
 {
