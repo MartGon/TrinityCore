@@ -24,6 +24,7 @@
 #include "ScriptMgr.h"
 #include "AreaTriggerAI.h"
 #include "GridNotifiers.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
@@ -171,7 +172,7 @@ class spell_pri_aq_3p_bonus : public SpellScriptLoader
 class spell_pri_atonement : public SpellScriptLoader
 {
 public:
-    static char constexpr ScriptName[] = "spell_pri_atonement";
+    static char constexpr const ScriptName[] = "spell_pri_atonement";
 
     spell_pri_atonement() : SpellScriptLoader(ScriptName) { }
 
