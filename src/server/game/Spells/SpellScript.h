@@ -764,7 +764,7 @@ class TC_GAME_API AuraScript : public _SpellScript
 
         // executed when aura effect calculates amount
         // example: DoEffectCalcAmount += AuraEffectCalcAmounFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
-        // where function is: void function (AuraEffect* aurEff, int32& amount, bool& canBeRecalculated);
+        // where function is: void function (AuraEffect* const aurEff, int32& amount, bool& canBeRecalculated);
         HookList<EffectCalcAmountHandler> DoEffectCalcAmount;
         #define AuraEffectCalcAmountFn(F, I, N) EffectCalcAmountHandlerFunction(&F, I, N)
 

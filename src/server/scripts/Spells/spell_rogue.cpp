@@ -47,7 +47,6 @@ enum RogueSpells
     SPELL_ROGUE_KILLING_SPREE_DMG_BUFF              = 61851,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
-    SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
     SPELL_ROGUE_SANCTUARY                           = 98877,
     SPELL_ROGUE_STEALTH                             = 1784,
     SPELL_ROGUE_STEALTH_STEALTH_AURA                = 158185,
@@ -693,7 +692,6 @@ class spell_rog_stealth : public SpellScriptLoader
                 {
                     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE,
                     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT,
-                    SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC,
                     SPELL_ROGUE_SANCTUARY,
                     SPELL_ROGUE_STEALTH_STEALTH_AURA,
                     SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA
@@ -718,9 +716,11 @@ class spell_rog_stealth : public SpellScriptLoader
                 Unit* target = GetTarget();
 
                 // Master of subtlety
-                if (target->HasAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE))
-                    target->CastSpell(target, SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC, true);
-
+                if(target->HasAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT))
+                {
+                    target->GetAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT)->SetMaxDuration(target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0)->GetAmount() * 1000);
+                    target->GetAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT)->SetDuration(target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0)->GetAmount() * 1000);
+                }
                 target->RemoveAurasDueToSpell(SPELL_ROGUE_STEALTH_STEALTH_AURA);
                 target->RemoveAurasDueToSpell(SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA);
             }
@@ -976,7 +976,7 @@ public:
     }
 };
 
-// 2098 - Eviscerate
+// 2098 - Run Through
 class spell_rog_eviscerate : public SpellScriptLoader
 {
 public:

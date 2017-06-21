@@ -18,9 +18,11 @@
 // This is where scripts' loading functions should be declared:
 
 void AddSC_spell_hun_steady_focus();
+void AddSC_spell_rog_spell_scripts_two();
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
     AddSC_spell_hun_steady_focus();
+    AddSC_spell_rog_spell_scripts_two();
 }

@@ -2925,6 +2925,24 @@ void SpellMgr::LoadSpellInfoCorrections()
     }
     );
 
+    ApplySpellFix({ 185422 }, [](SpellInfo* spellInfo) // Shadow Dance damage extra 
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_3))->ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+    }
+    );
+
+    ApplySpellFix({ 200759 }, [](SpellInfo* spellInfo) // Shooting Darkness affect shadow dance  
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->SpellClassMask = flag128(0, 0, 0, 0x00004080);//con 0x4080 en el ultimo funciona 1º -- 4º
+    }   
+    );
+
+    ApplySpellFix({ 1784 }, [](SpellInfo* spellInfo) // Stealth damage extra by NightStalker
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_3))->ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+    }
+    );
+
     ApplySpellFix({
         63026, // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
         63137  // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
