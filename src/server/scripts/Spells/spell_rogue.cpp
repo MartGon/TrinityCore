@@ -726,8 +726,14 @@ class spell_rog_stealth : public SpellScriptLoader
                 target->RemoveAurasDueToSpell(SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA);
             }
 
+            void HandleOnApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+            {
+                printf("Do something %i",GetEffect(EFFECT_3)->GetAmount()); //Lo hace bien, el sigilo se elimina antes del golpe...
+            }
+
             void Register() override
             {
+                OnEffectApply += AuraEffectApplyFn(spell_rog_stealth_AuraScript::HandleOnApply, EFFECT_3, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectApply += AuraEffectApplyFn(spell_rog_stealth_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_rog_stealth_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }

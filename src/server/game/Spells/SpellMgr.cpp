@@ -2925,20 +2925,15 @@ void SpellMgr::LoadSpellInfoCorrections()
     }
     );
 
-    ApplySpellFix({ 185422 }, [](SpellInfo* spellInfo) // Shadow Dance damage extra 
+    ApplySpellFix({ 185422 }, [](SpellInfo* spellInfo) // Shadow Dance damage extra from NightStalker
     {
         const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_3))->ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
     }
     );
 
-    ApplySpellFix({ 200759 }, [](SpellInfo* spellInfo) // Shooting Darkness affect shadow dance  
-    {
-        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->SpellClassMask = flag128(0, 0, 0, 0x00004080);//con 0x4080 en el ultimo funciona 1º -- 4º
-    }   
-    );
-
     ApplySpellFix({ 1784 }, [](SpellInfo* spellInfo) // Stealth damage extra by NightStalker
     {
+        //spellInfo->InterruptFlags = 0x08023C00;
         const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_3))->ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
     }
     );
