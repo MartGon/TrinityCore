@@ -707,6 +707,12 @@ class spell_rog_stealth : public SpellScriptLoader
                 if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0))
                     target->CastCustomSpell(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), target, true);
 
+                if (target->HasAura(108209)) // shadow focus passive
+                    target->CastSpell(GetTarget(),112942,true); // shadow focus aura
+
+                if (target->HasAura(196976)) //Master of Shadows passive
+                    target->CastSpell(GetTarget(), 196980, true); // Master of Shadows regen aura
+
                 target->CastSpell(target, SPELL_ROGUE_SANCTUARY, TRIGGERED_FULL_MASK);
                 target->CastSpell(target, SPELL_ROGUE_STEALTH_STEALTH_AURA, TRIGGERED_FULL_MASK);
                 target->CastSpell(target, SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA, TRIGGERED_FULL_MASK);
@@ -722,8 +728,11 @@ class spell_rog_stealth : public SpellScriptLoader
                     target->GetAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT)->SetMaxDuration(target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0)->GetAmount() * 1000);
                     target->GetAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT)->SetDuration(target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0)->GetAmount() * 1000);
                 }
+                //if (target->HasAura(108209)) // shadow focus passive
+                    target->RemoveAura(112942); // shadow focus aura
                 target->RemoveAurasDueToSpell(SPELL_ROGUE_STEALTH_STEALTH_AURA);
                 target->RemoveAurasDueToSpell(SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA);
+                printf("Aura Removed");
             }
 
             void HandleOnApply(AuraEffect const* aurEff, AuraEffectHandleModes mode)
