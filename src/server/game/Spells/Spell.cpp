@@ -55,6 +55,9 @@
 #include "World.h"
 #include "WorldSession.h"
 
+//Custom .h
+
+
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
 SpellDestination::SpellDestination()
@@ -2548,6 +2551,41 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         CallScriptAfterHitHandlers();
     }
+    //Todo Se cancelan los casts de sigilo ¿?¿?¿?
+    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth() && m_spellInfo->CalcCastTime()==0 && IsThisIdOnMap(m_spellInfo->Id))
+    {
+        printf("entering");
+        m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
+        for (SpellEffectInfo const* effect : GetEffects())
+            if (effect && effect->GetUsedTargetObjectType() == TARGET_OBJECT_TYPE_UNIT)
+            {
+                m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_SPELL_ATTACK);
+                break;
+            }
+    }
+}
+
+// new stupid function
+bool Spell::IsThisIdOnMap(int id)
+{
+    if (id == 185438 || //Shadowstrike
+        id == 53     || // Backstab 
+        id == 196819 || // Eviscerate
+        id == 114014 || // Shuriken Toss
+        id == 197835 || // Shuriken Storm
+        id == 209782 || // Goremaw's Bite (Artifact)
+        id == 51723  || // Fan of Knives
+        id == 1329   || // Mutilate
+        id == 16511  || // Hemorrhage
+        id == 245389 || // Toxic Blade
+        id == 32645  || // Envenom
+        id == 185565 || // Poisoned Knife
+        id == 222062 || // Kingsbane (Artifact)
+        id == 200758    // GloomBlade
+        )
+        return true;
+
+    return false;
 }
 
 SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleAura)
@@ -3083,9 +3121,10 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     else
     {
         // stealth must be removed at cast starting (at show channel bar)
-        // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth())
+        // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)     /*Nuevo                                                     */
+        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth() && !IsThisIdOnMap(m_spellInfo->Id))
         {
+            printf("entering %i",m_spellInfo->Id);
             m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
             for (SpellEffectInfo const* effect : GetEffects())
                 if (effect && effect->GetUsedTargetObjectType() == TARGET_OBJECT_TYPE_UNIT)
@@ -3104,6 +3143,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         //item: first cast may destroy item and second cast causes crash
         if (!m_casttime && !m_spellInfo->StartRecoveryTime && !m_castItemGUID && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
             cast(true);
+
     }
 }
 

@@ -837,6 +837,10 @@ class TC_GAME_API Spell
         bool CheckScriptEffectImplicitTargets(uint32 effIndex, uint32 effIndexToCheck);
         std::vector<SpellScript*> m_loadedScripts;
 
+        //New Addition
+
+        bool IsThisIdOnMap(int id);
+
         struct HitTriggerSpell
         {
             SpellInfo const* triggeredSpell;
