@@ -2938,6 +2938,22 @@ void SpellMgr::LoadSpellInfoCorrections()
     }
     );
 
+    ApplySpellFix({ 108208 }, [](SpellInfo* spellInfo) // Subterfuge passive
+    {
+        //spellInfo->InterruptFlags = 0x08023C00;
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->BasePoints = 1784;
+    }
+    );
+
+    ApplySpellFix({ 115192 }, [](SpellInfo* spellInfo) // Subterfuge aura
+    {
+        //spellInfo->InterruptFlags = 0x08023C00;
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->ApplyAuraName = SPELL_AURA_MOD_SHAPESHIFT;
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->MiscValue = 30;
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->MiscValueB = 2;
+    }
+    );
+
     ApplySpellFix({
         63026, // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
         63137  // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)

@@ -839,7 +839,7 @@ class TC_GAME_API Spell
 
         //New Addition
 
-        bool IsThisIdOnMap(int id);
+        //bool IsThisIdOnMap(int id);
 
         struct HitTriggerSpell
         {

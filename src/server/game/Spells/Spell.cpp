@@ -56,7 +56,7 @@
 #include "WorldSession.h"
 
 //Custom .h
-
+#include "FindSpellID.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -2565,28 +2565,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
 }
 
-// new stupid function
-bool Spell::IsThisIdOnMap(int id)
-{
-    if (id == 185438 || //Shadowstrike
-        id == 53     || // Backstab 
-        id == 196819 || // Eviscerate
-        id == 114014 || // Shuriken Toss
-        id == 197835 || // Shuriken Storm
-        id == 209782 || // Goremaw's Bite (Artifact)
-        id == 51723  || // Fan of Knives
-        id == 1329   || // Mutilate
-        id == 16511  || // Hemorrhage
-        id == 245389 || // Toxic Blade
-        id == 32645  || // Envenom
-        id == 185565 || // Poisoned Knife
-        id == 222062 || // Kingsbane (Artifact)
-        id == 200758    // GloomBlade
-        )
-        return true;
 
-    return false;
-}
 
 SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleAura)
 {

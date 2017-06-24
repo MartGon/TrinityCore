@@ -128,14 +128,14 @@ public:
 };
 
 // Subterfuge effect - 115192
-class spell_rog_subterfuge_effect : public SpellScriptLoader
+class spell_rog_subterfuge_aura : public SpellScriptLoader
 {
 public:
-    spell_rog_subterfuge_effect() : SpellScriptLoader("spell_rog_subterfuge_effect") { }
+    spell_rog_subterfuge_aura() : SpellScriptLoader("spell_rog_subterfuge_aura") { }
 
-    class spell_rog_subterfuge_effect_AuraScript : public AuraScript
+    class spell_rog_subterfuge_aura_AuraScript : public AuraScript
     {
-        PrepareAuraScript(spell_rog_subterfuge_effect_AuraScript);
+        PrepareAuraScript(spell_rog_subterfuge_aura_AuraScript);
 
         void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
@@ -147,22 +147,29 @@ public:
                 GetCaster()->RemoveAura(subterfuge, AURA_REMOVE_BY_CANCEL);
         }
 
+        void CorrectEffect(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            PreventDefaultAction();
+            printf("hey");
+        }
+
         void Register()
         {
-            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_subterfuge_effect_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_subterfuge_aura_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_rog_subterfuge_aura_AuraScript::CorrectEffect, EFFECT_0, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
     AuraScript* GetAuraScript() const
     {
-        return new spell_rog_subterfuge_effect_AuraScript();
+        return new spell_rog_subterfuge_aura_AuraScript();
     }
 };
 
 
 void AddSC_spell_rog_spell_scripts_two()
 {
-    new spell_rog_subterfuge_effect();
+    new spell_rog_subterfuge_aura();
     new spell_rog_shadow_dance_aura();
     new spell_rog_master_of_subtlety_passive();
 }

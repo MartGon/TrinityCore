@@ -729,7 +729,11 @@ class spell_rog_stealth : public SpellScriptLoader
                     target->GetAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT)->SetDuration(target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0)->GetAmount() * 1000);
                 }
                 //if (target->HasAura(108209)) // shadow focus passive
-                    target->RemoveAura(112942); // shadow focus aura
+
+                if (GetTarget()->HasAura(108208)) // Subterfuge passive
+                    target->CastSpell(GetTarget(), 115192); //Subterfuge aura
+
+                target->RemoveAura(112942); // shadow focus aura
                 target->RemoveAurasDueToSpell(SPELL_ROGUE_STEALTH_STEALTH_AURA);
                 target->RemoveAurasDueToSpell(SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA);
                 printf("Aura Removed");
