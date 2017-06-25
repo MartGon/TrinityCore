@@ -2954,6 +2954,12 @@ void SpellMgr::LoadSpellInfoCorrections()
     }
     );
 
+    ApplySpellFix({ 137619 }, [](SpellInfo* spellInfo) // Subterfuge aura
+    {
+        spellInfo->AttributesEx3 = 0;
+    }
+    );
+
     ApplySpellFix({
         63026, // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
         63137  // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)

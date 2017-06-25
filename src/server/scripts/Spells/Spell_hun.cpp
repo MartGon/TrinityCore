@@ -915,7 +915,6 @@ class spell_hun_murder_crows : public SpellScriptLoader
 
             void HandleOnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                Unit *target = GetTarget();
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
                     GetCaster()->GetSpellHistory()->ResetCooldown(GetSpellInfo()->Id, true);
             }
