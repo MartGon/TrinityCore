@@ -1502,12 +1502,23 @@ bool SpellInfo::IsChanneled() const
 
 bool SpellInfo::NeedsComboPoints() const
 {
+    //Check if has combo points
+    for (int i = 0; i < PowerCosts.size(); i++)
+    {
+        if(PowerCosts.at(i)->PowerType == POWER_COMBO_POINTS)
+        {
+            printf("Tiene combo points \n");
+            return true;
+        }
+            
+    }
     return HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS2);
 }
 
 bool SpellInfo::IsBreakingStealth() const
 {
     return !HasAttribute(SPELL_ATTR1_NOT_BREAK_STEALTH);
+    
 }
 
 bool SpellInfo::IsRangedWeaponSpell() const

@@ -2551,18 +2551,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         CallScriptAfterHitHandlers();
     }
-    //Todo Se cancelan los casts de sigilo ¿?¿?¿?
-    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth() && m_spellInfo->CalcCastTime()==0 && IsThisIdOnMap(m_spellInfo->Id))
-    {
-        printf("entering");
-        m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
-        for (SpellEffectInfo const* effect : GetEffects())
-            if (effect && effect->GetUsedTargetObjectType() == TARGET_OBJECT_TYPE_UNIT)
-            {
-                m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_SPELL_ATTACK);
-                break;
-            }
-    }
 }
 
 
@@ -3574,7 +3562,10 @@ void Spell::_handle_finish_phase()
     {
         // Take for real after all targets are processed
         if (m_needComboPoints)
+        {
             m_caster->m_playerMovingMe->ClearComboPoints();
+            printf("Handling finish phase for combo points");
+        }
 
         // Real add combo points from effects
         if (m_comboPointGain)
@@ -3587,6 +3578,19 @@ void Spell::_handle_finish_phase()
             m_caster->HandleProcExtraAttackFor(victim);
         else
             m_caster->m_extraAttacks = 0;
+    }
+
+    //Todo Se cancelan los casts de sigilo ¿?¿?¿?
+    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth() && m_spellInfo->CalcCastTime() == 0 && IsThisIdOnMap(m_spellInfo->Id))
+    {
+        printf("entering");
+        m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
+        for (SpellEffectInfo const* effect : GetEffects())
+            if (effect && effect->GetUsedTargetObjectType() == TARGET_OBJECT_TYPE_UNIT)
+            {
+                m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_SPELL_ATTACK);
+                break;
+            }
     }
 
     /// @todo trigger proc phase finish here
