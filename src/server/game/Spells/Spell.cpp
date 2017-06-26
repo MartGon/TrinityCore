@@ -3563,8 +3563,11 @@ void Spell::_handle_finish_phase()
         // Take for real after all targets are processed
         if (m_needComboPoints)
         {
+            bool yes = false;
             m_caster->m_playerMovingMe->ClearComboPoints();
-            printf("Handling finish phase for combo points");
+
+            if (yes)
+                m_caster->ModifyPower(POWER_COMBO_POINTS, 1);
         }
 
         // Real add combo points from effects
@@ -4597,7 +4600,7 @@ void Spell::TakePower()
             continue;
         }
 
-        if (hit)
+        if (hit && powerType != POWER_COMBO_POINTS) // So it doesn't spend just one combo point, fixes calculation of combo points
             m_caster->ModifyPower(powerType, -cost.Amount);
         else
             m_caster->ModifyPower(powerType, -irand(0, cost.Amount / 4));

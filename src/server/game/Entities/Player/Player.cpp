@@ -23467,7 +23467,6 @@ void Player::ClearComboPoints()
 {
     // without combopoints lost (duration checked in aura)
     RemoveAurasByType(SPELL_AURA_RETAIN_COMBO_POINTS);
-    printf("hey CLEARCOMBOPOINTS");
     SetPower(POWER_COMBO_POINTS, 0);
 }
 

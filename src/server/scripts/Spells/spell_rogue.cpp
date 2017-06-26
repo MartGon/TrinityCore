@@ -1009,10 +1009,6 @@ public:
 
         void HandleAfterHit()
         {
-            if (GetCaster()->HasAura(14161) && roll_chance_i((GetCaster()->GetPower(POWER_COMBO_POINTS) + 1) * 20))
-                GetCaster()->SetPower(POWER_COMBO_POINTS, 1);
-            else
-                GetCaster()->SetPower(POWER_COMBO_POINTS, 0);
         }
 
         void Register() override
@@ -1047,10 +1043,6 @@ public:
 
         void HandleAfterHit()
         {
-            if (GetCaster()->HasAura(14161) && roll_chance_i((GetCaster()->GetPower(POWER_COMBO_POINTS)+1) * 20))
-                GetCaster()->SetPower(POWER_COMBO_POINTS, 1);
-            else
-                GetCaster()->SetPower(POWER_COMBO_POINTS, 0);
         }
 
         void Register() override
@@ -1237,7 +1229,7 @@ public:
         int32 CalcDuration()
         {
             int32 duration = 0;
-            duration = (GetCaster()->GetPower(POWER_COMBO_POINTS) + 1) * 6 + 6;
+            duration = (GetCaster()->GetPower(POWER_COMBO_POINTS)) * 6 + 6;
             return duration;
         }
 
@@ -1248,24 +1240,25 @@ public:
                 for (std::vector<int32>::iterator itr = spellIDs.begin(); itr != spellIDs.end(); itr++)
                 {
                     GetCaster()->CastSpell(GetCaster(), *itr, true);
-                    //GetCaster()->GetAura(*itr)->SetDuration(CalcDuration());
+                    GetCaster()->GetAura(*itr)->SetMaxDuration(CalcDuration());
+                    GetCaster()->GetAura(*itr)->SetDuration(CalcDuration());
                     return;
                 }
             if (winner3 !=0)
             {
                 GetCaster()->CastSpell(GetCaster(), winner3, true);
-                //GetCaster()->GetAuraD(winner2)->SetDuration(CalcDuration());
+                GetCaster()->GetAura(winner3)->SetMaxDuration(CalcDuration());
+                GetCaster()->GetAura(winner3)->SetDuration(CalcDuration());
             }
             if (winner2 !=0)
             {
                 GetCaster()->CastSpell(GetCaster(), winner2, true);
-                //GetCaster()->GetAura(winner2)->SetDuration(CalcDuration());
+                GetCaster()->GetAura(winner2)->SetMaxDuration(CalcDuration());
+                GetCaster()->GetAura(winner2)->SetDuration(CalcDuration());
             }
             GetCaster()->CastSpell(GetCaster(), winner, true);
-            GetCaster()->AddAura(winner, GetCaster());
-            std::cout << "La duracion es " << GetCaster()->GetAura(winner)->GetDuration();
+            GetCaster()->GetAura(winner)->SetMaxDuration(CalcDuration());
             GetCaster()->GetAura(winner)->SetDuration(CalcDuration(),true);
-            std::cout << "La duracion es " << GetCaster()->GetAura(winner)->GetDuration();
         }
 
         std::vector<int32> spellIDs;
