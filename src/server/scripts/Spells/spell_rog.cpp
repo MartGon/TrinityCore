@@ -116,6 +116,16 @@ public:
     {
         PrepareSpellScript(spell_rog_shadowstrike_SpellScript);
 
+        void HandleOnCast()
+        {
+            if (GetCaster()->HasAura(245623))
+            {
+                Position  pos = GetExplTargetUnit()->GetFirstCollisionPosition(GetExplTargetUnit()->GetObjectSize(),3.1416f);
+                GetCaster()->SendTeleportPacket(pos); // Teleport to back
+            }
+                
+        }
+
         void HandleOnHit(SpellEffIndex effIndex)
         {
             if (GetCaster()->HasAura(196951)) // Strike from shadows passive
@@ -127,6 +137,7 @@ public:
 
         void Register() override
         {
+            OnCast += SpellCastFn(spell_rog_shadowstrike_SpellScript::HandleOnCast);
             OnEffectHit += SpellEffectFn(spell_rog_shadowstrike_SpellScript::HandleOnHit, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
         }
     };

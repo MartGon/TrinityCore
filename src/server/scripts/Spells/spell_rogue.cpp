@@ -713,6 +713,9 @@ class spell_rog_stealth : public SpellScriptLoader
                 if (target->HasAura(196976)) //Master of Shadows passive
                     target->CastSpell(GetTarget(), 196980, true); // Master of Shadows regen aura
 
+                if (target->HasSpell(245623)) // ShadowStrike extra 25 yd
+                    target->AddAura(245623,target);
+
                 target->CastSpell(target, SPELL_ROGUE_SANCTUARY, TRIGGERED_FULL_MASK);
                 target->CastSpell(target, SPELL_ROGUE_STEALTH_STEALTH_AURA, TRIGGERED_FULL_MASK);
                 target->CastSpell(target, SPELL_ROGUE_STEALTH_SHAPESHIFT_AURA, TRIGGERED_FULL_MASK);
@@ -732,6 +735,9 @@ class spell_rog_stealth : public SpellScriptLoader
 
                 if (GetTarget()->HasAura(108208)) // Subterfuge passive
                     target->CastSpell(GetTarget(), 115192); //Subterfuge aura
+
+                if (target->HasSpell(245623)) // ShadowStrike extra 25 yd
+                    target->RemoveAura(245623);
 
                 target->RemoveAura(112942); // shadow focus aura
                 target->RemoveAurasDueToSpell(SPELL_ROGUE_STEALTH_STEALTH_AURA);
