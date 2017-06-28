@@ -1176,6 +1176,7 @@ public:
             {
                 int32 selector = irand(0, dice_number - 1);
                 count[spellIDs.at(selector)]++;
+                printf("Ha salido esta spell %i\n", spellIDs.at(selector));
             }
 
             GetWinner(count);
@@ -1221,7 +1222,7 @@ public:
                 for (std::map<int32, int32>::iterator itr = map.begin(); itr != map.end(); itr++)
                 {
                     if (itr->second == max && itr->first != winner)
-                        winner2 = itr->first;
+                        winner3 = itr->first;
                 }
             return winner;
         }
@@ -1230,7 +1231,7 @@ public:
         {
             int32 duration = 0;
             duration = (GetCaster()->GetPower(POWER_COMBO_POINTS)) * 6 + 6;
-            return duration;
+            return duration * 1000;
         }
 
         void AddAuras()
@@ -1239,24 +1240,24 @@ public:
             if (isTie)
                 for (std::vector<int32>::iterator itr = spellIDs.begin(); itr != spellIDs.end(); itr++)
                 {
-                    GetCaster()->CastSpell(GetCaster(), *itr, true);
+                    GetCaster()->AddAura(*itr, GetCaster());
                     GetCaster()->GetAura(*itr)->SetMaxDuration(CalcDuration());
                     GetCaster()->GetAura(*itr)->SetDuration(CalcDuration());
                     return;
                 }
             if (winner3 !=0)
             {
-                GetCaster()->CastSpell(GetCaster(), winner3, true);
+                GetCaster()->AddAura(winner3, GetCaster());
                 GetCaster()->GetAura(winner3)->SetMaxDuration(CalcDuration());
                 GetCaster()->GetAura(winner3)->SetDuration(CalcDuration());
             }
             if (winner2 !=0)
             {
-                GetCaster()->CastSpell(GetCaster(), winner2, true);
+                GetCaster()->AddAura(winner2, GetCaster());
                 GetCaster()->GetAura(winner2)->SetMaxDuration(CalcDuration());
                 GetCaster()->GetAura(winner2)->SetDuration(CalcDuration());
             }
-            GetCaster()->CastSpell(GetCaster(), winner, true);
+            GetCaster()->AddAura(winner, GetCaster());
             GetCaster()->GetAura(winner)->SetMaxDuration(CalcDuration());
             GetCaster()->GetAura(winner)->SetDuration(CalcDuration(),true);
         }

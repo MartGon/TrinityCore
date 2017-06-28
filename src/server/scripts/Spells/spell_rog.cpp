@@ -25,6 +25,8 @@ enum rog_spells
 };
 
 
+// 
+
 // 137619 - marked-for-death
 class spell_rog_marked_for_death : public SpellScriptLoader
 {
@@ -58,7 +60,6 @@ public:
         void Register() override
         {
             AfterEffectRemove += AuraEffectApplyFn(spell_rog_marked_for_death_AuraScript::HandleOnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            //OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_marked_for_death_AuraScript::HandlePeroidic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 

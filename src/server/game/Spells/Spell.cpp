@@ -57,6 +57,7 @@
 
 //Custom .h
 #include "FindSpellID.h"
+#include "ComboPointManager.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -3563,7 +3564,7 @@ void Spell::_handle_finish_phase()
         // Take for real after all targets are processed
         if (m_needComboPoints)
         {
-            bool yes = false;
+            bool yes = ComboPointManager::HandleComboPoints(m_caster);
             m_caster->m_playerMovingMe->ClearComboPoints();
 
             if (yes)
@@ -4593,6 +4594,8 @@ void Spell::TakePower()
             m_caster->ModifyHealth(-cost.Amount);
             continue;
         }
+        if (powerType == POWER_COMBO_POINTS)
+            continue;
 
         if (powerType >= MAX_POWERS)
         {
@@ -4600,7 +4603,7 @@ void Spell::TakePower()
             continue;
         }
 
-        if (hit && powerType != POWER_COMBO_POINTS) // So it doesn't spend just one combo point, fixes calculation of combo points
+        if (hit) // So it doesn't spend just one combo point, fixes calculation of combo points
             m_caster->ModifyPower(powerType, -cost.Amount);
         else
             m_caster->ModifyPower(powerType, -irand(0, cost.Amount / 4));

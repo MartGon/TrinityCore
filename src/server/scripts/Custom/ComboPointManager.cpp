@@ -1,28 +1,13 @@
 #include "Spell.h"
 #include "Unit.h"
 #include "SpellHistory.h"
+#include "SpellMgr.h"
+#include "SpellAuraEffects.h"
+#include "Player.h"
+#include "ComboPointManager.h"
 
-class ComboPointManager
-{
-public:
 
-    enum rogue_spells
-    {
-        ADRENALINE_RUSH = 13750,
-        ALACRITY = 193539,
-        ALACRITY_AURA = 193538,
-        BETWEEN_EYES = 199804,
-        CANNONBALL_BARRAGE = 185767,
-        DEATH_FROM_ABOVE = 152150,
-        GRAPPLING_HOOK = 195457,
-        KILLING_SPREE = 51690,
-        MARKED_DEATH = 137619,
-        RESTLESS_BLADE = 79096,
-        SPRINT = 2983,
-        VANISH = 1856
-    };
-
-    bool HandleRuhtlessness(Unit* m_caster)
+    bool ComboPointManager::HandleRuhtlessness(Unit* m_caster)
     {
         bool yes = false;
         if (m_caster->HasAura(14161)) // Ruthlessness
@@ -31,12 +16,12 @@ public:
         return yes;
     }
 
-    void HandleRestlessBlades(Unit* m_caster)
+    void ComboPointManager::HandleRestlessBlades(Unit* m_caster)
     {
         if (m_caster->HasAura(RESTLESS_BLADE))
         {
             int32 spent = m_caster->GetPower(POWER_COMBO_POINTS) + 1;
-            float seconds = spent * 0.5 * 1000;
+            float seconds = -1 * spent * 0.5 * 1000;
             std::vector<int32> vector;
 
             vector.push_back(ADRENALINE_RUSH);
@@ -57,13 +42,61 @@ public:
         }
     }
 
-    void HandleAlacrity(Unit* m_caster)
+    void ComboPointManager::HandleAlacrity(Unit* m_caster)
     {
         if (m_caster->HasAura(ALACRITY))
             if (roll_chance_i((m_caster->GetPower(POWER_COMBO_POINTS) + 1) * 20))
-                m_caster->CastSpell(m_caster, 193538, true);
+                m_caster->CastSpell(m_caster, ALACRITY_AURA, true);
     }
 
+    void ComboPointManager::HandleDeepingShadows(Unit* m_caster)
+    {
+        if (m_caster->HasAura(DEPEENING_SHADOWS))
+        {
+            int32 spent = m_caster->GetPower(POWER_COMBO_POINTS);
+            float ms = -1 * spent * m_caster->GetAuraEffect(DEPEENING_SHADOWS, EFFECT_0)->CalculateAmount(m_caster) * 100;
 
+            m_caster->GetSpellHistory()->ModifyCharge(sSpellMgr->GetSpellInfo(SHADOW_DANCE)->ChargeCategoryId, ms);
+        }
+    }
 
-};
+    void ComboPointManager::HandleRelentlessStrikes(Unit* m_caster)
+    {
+        if (m_caster->HasAura(RELENTLESS_STRIKES))
+        {
+            int32 combo = m_caster->GetPower(POWER_COMBO_POINTS);
+            int32 energy = combo * 6;
+
+            m_caster->ModifyPower(POWER_ENERGY, energy);
+        }
+    }
+
+    bool ComboPointManager::HandleOutLaw(Unit* m_caster)
+    {
+        if(Player *player = m_caster->ToPlayer())
+            if (player->GetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID) == TALENT_SPEC_ROGUE_COMBAT)
+            {
+                HandleRestlessBlades(m_caster);
+                HandleAlacrity(m_caster);
+                return HandleRuhtlessness(m_caster);
+            }
+        return false;
+    }
+
+    void ComboPointManager::HandleSubtlety(Unit* m_caster)
+    {
+        if (Player *player = m_caster->ToPlayer())
+            if (player->GetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID) == TALENT_SPEC_ROGUE_SUBTLETY)
+            {
+                HandleDeepingShadows(m_caster);
+                HandleRelentlessStrikes(m_caster);
+            }
+    }
+
+    bool ComboPointManager::HandleComboPoints(Unit *m_caster)
+    {
+        HandleSubtlety(m_caster);
+        return HandleOutLaw(m_caster);
+    }
+
+    //TODO cambiar cooldowns por valores negativos
