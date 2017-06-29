@@ -4048,13 +4048,11 @@ void AuraEffect::HanldeAuraModMaxPower(AuraApplication const* aurApp, uint8 mode
 
     if (apply)
     {
-        printf("apply \n");
         int32 power = GetAmount() + target->GetMaxPower((Powers)GetMiscValue());
         target->SetMaxPower((Powers)GetMiscValue(), power);
     }
     else
     {
-        printf("not apply \n");
         int32 original = target->GetCreatePowers((Powers)GetMiscValue());
         target->SetMaxPower((Powers)GetMiscValue(), original);
     }

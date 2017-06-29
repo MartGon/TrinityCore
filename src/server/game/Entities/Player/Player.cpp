@@ -23467,7 +23467,11 @@ void Player::ClearComboPoints()
 {
     // without combopoints lost (duration checked in aura)
     RemoveAurasByType(SPELL_AURA_RETAIN_COMBO_POINTS);
-    SetPower(POWER_COMBO_POINTS, 0);
+
+    if (HasSpell(114015) && GetPower(POWER_COMBO_POINTS) > 5) // Anticipation, now has 10 combo points maximum
+        SetPower(POWER_COMBO_POINTS,GetPower(POWER_COMBO_POINTS) - 5);
+    else
+        SetPower(POWER_COMBO_POINTS, 0);
 }
 
 void Player::SetGroup(Group* group, int8 subgroup)

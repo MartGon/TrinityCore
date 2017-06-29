@@ -1531,7 +1531,13 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void SetTarget(ObjectGuid const& /*guid*/) override { } /// Used for serverside target changes, does not apply to players
         void SetSelection(ObjectGuid const& guid) { SetGuidValue(UNIT_FIELD_TARGET, guid); }
 
-        uint32 GetComboPoints() const { return uint32(GetPower(POWER_COMBO_POINTS)); }
+        uint32 GetComboPoints() const 
+        { 
+            if (GetPower(POWER_COMBO_POINTS) > 5 && !HasAura(193531))
+                return uint32(5);
+            else
+                return uint32(GetPower(POWER_COMBO_POINTS)); 
+        }
         void AddComboPoints(int8 count, Spell* spell = nullptr);
         void GainSpellComboPoints(int8 count);
         void ClearComboPoints();
