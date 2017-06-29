@@ -88,6 +88,7 @@
         if (Player *player = m_caster->ToPlayer())
             if (player->GetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID) == TALENT_SPEC_ROGUE_SUBTLETY)
             {
+                HandleAlacrity(m_caster);
                 HandleDeepingShadows(m_caster);
                 HandleRelentlessStrikes(m_caster);
             }

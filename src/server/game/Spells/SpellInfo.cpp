@@ -1507,7 +1507,6 @@ bool SpellInfo::NeedsComboPoints() const
         if(PowerCosts.at(i)->PowerType == POWER_COMBO_POINTS)
             return true;   
     return false;
-        /*HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS2)*/
 }
 
 bool SpellInfo::IsBreakingStealth() const
