@@ -1,4 +1,11 @@
+   -- 193539 Alacrity
+DELETE FROM `spell_script_names` WHERE `spell_id`=193539;
+INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(193539,"spell_rog_alacrity");
  
+  -- 76806 - Main gauche Mastery
+DELETE FROM `spell_script_names` WHERE `spell_id`=76806;
+INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(76806,"spell_rog_main_gauche");
+
  -- 185313 - Shadow Dance
 DELETE FROM `spell_script_names` WHERE `spell_id`=185313;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(185313,"spell_rog_shadow_dance_aura");

@@ -11,7 +11,7 @@
     {
         bool yes = false;
         if (m_caster->HasAura(14161)) // Ruthlessness
-            yes = roll_chance_i((m_caster->GetPower(POWER_COMBO_POINTS) + 1) * 20);
+            yes = roll_chance_i((m_caster->ToPlayer()->GetComboPoints()) * 20);
 
         return yes;
     }
@@ -20,7 +20,7 @@
     {
         if (m_caster->HasAura(RESTLESS_BLADE))
         {
-            int32 spent = m_caster->GetPower(POWER_COMBO_POINTS) + 1;
+            int32 spent = m_caster->ToPlayer()->GetComboPoints();
             float seconds = -1 * spent * 0.5 * 1000;
             std::vector<int32> vector;
 
@@ -45,7 +45,7 @@
     void ComboPointManager::HandleAlacrity(Unit* m_caster)
     {
         if (m_caster->HasAura(ALACRITY))
-            if (roll_chance_i((m_caster->GetPower(POWER_COMBO_POINTS) + 1) * 20))
+            if (roll_chance_i((m_caster->ToPlayer()->GetComboPoints()) * 20))
                 m_caster->CastSpell(m_caster, ALACRITY_AURA, true);
     }
 
@@ -53,7 +53,7 @@
     {
         if (m_caster->HasAura(DEPEENING_SHADOWS))
         {
-            int32 spent = m_caster->GetPower(POWER_COMBO_POINTS);
+            int32 spent = m_caster->ToPlayer()->GetComboPoints();
             float ms = -1 * spent * m_caster->GetAuraEffect(DEPEENING_SHADOWS, EFFECT_0)->CalculateAmount(m_caster) * 100;
 
             m_caster->GetSpellHistory()->ModifyCharge(sSpellMgr->GetSpellInfo(SHADOW_DANCE)->ChargeCategoryId, ms);
@@ -64,7 +64,7 @@
     {
         if (m_caster->HasAura(RELENTLESS_STRIKES))
         {
-            int32 combo = m_caster->GetPower(POWER_COMBO_POINTS);
+            int32 combo = m_caster->ToPlayer()->GetComboPoints();
             int32 energy = combo * 6;
 
             m_caster->ModifyPower(POWER_ENERGY, energy);

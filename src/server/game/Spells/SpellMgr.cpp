@@ -2954,7 +2954,13 @@ void SpellMgr::LoadSpellInfoCorrections()
     }
     );
 
-    ApplySpellFix({ 137619 }, [](SpellInfo* spellInfo) // Subterfuge aura
+    ApplySpellFix({ 76806 }, [](SpellInfo* spellInfo) // Main Gauche MAstery
+    {
+        spellInfo->ProcFlags = 0x00400000;
+    }
+    );
+
+    ApplySpellFix({ 137619 }, [](SpellInfo* spellInfo) // Marked for death, 
     {
         spellInfo->AttributesEx3 = 0;
     }

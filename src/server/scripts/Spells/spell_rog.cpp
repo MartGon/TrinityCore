@@ -14,9 +14,10 @@
 
 enum rog_spells
 {
-
+    SPELL_ROGUE_MAIN_GAUCHE_ATTACK                = 86392,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE        = 31223,
+    SPELL_ROGUE_MASTERY_MAIN_GAUCHE               = 76806,
     SPELL_ROGUE_SHADOW_DANCE_AURA2                = 185422,
     SPELL_ROGUE_SOOTHING_DARKNESS                 = 200759,
     SPELL_ROGUE_STEALTH                           = 1784,
@@ -25,7 +26,75 @@ enum rog_spells
 };
 
 
-// 
+// 193539 Alacrity
+class spell_rog_alacrity : public SpellScriptLoader
+{
+public:
+    spell_rog_alacrity() : SpellScriptLoader("spell_rog_alacrity") { }
+
+    class spell_rog_alacrity_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_alacrity_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            return false;
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_alacrity_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_alacrity_AuraScript();
+    }
+};
+
+// 76806 - Main Gauche
+class spell_rog_main_gauche : public SpellScriptLoader
+{
+public:
+    spell_rog_main_gauche() : SpellScriptLoader("spell_rog_main_gauche") { }
+
+    class spell_rog_main_gauche_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_main_gauche_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo
+            ({
+                SPELL_ROGUE_MASTERY_MAIN_GAUCHE,
+                SPELL_ROGUE_MAIN_GAUCHE_ATTACK
+            });
+        }
+
+        void HandleOnProc(ProcEventInfo& eventInfo)
+        {
+            Unit* target = eventInfo.GetProcTarget();
+            GetTarget()->CastSpell(target, SPELL_ROGUE_MAIN_GAUCHE_ATTACK, true);
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            return roll_chance_f(GetEffect(EFFECT_0)->GetAmount());
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_main_gauche_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_rog_main_gauche_AuraScript::HandleOnProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_main_gauche_AuraScript();
+    }
+};
 
 // 137619 - marked-for-death
 class spell_rog_marked_for_death : public SpellScriptLoader
@@ -268,10 +337,10 @@ public:
 };
 
 
-//TODO fix apply aura de combo points, no se updatea al loguear
-
 void AddSC_spell_rog_spell_scripts_two()
 {
+    new spell_rog_alacrity();
+    new spell_rog_main_gauche();
     new spell_rog_marked_for_death();
     new spell_rog_master_of_subtlety_passive();
     new spell_rog_shadow_dance_aura();
