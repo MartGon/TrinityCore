@@ -4041,6 +4041,8 @@ void AuraEffect::HandleAuraModOverridePowerDisplay(AuraApplication const* aurApp
 
 void AuraEffect::HanldeAuraModMaxPower(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
+    //TODO el valor se hace overwrite en algun lugar mierdoso.
+
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
@@ -4056,6 +4058,7 @@ void AuraEffect::HanldeAuraModMaxPower(AuraApplication const* aurApp, uint8 mode
         int32 original = target->GetCreatePowers((Powers)GetMiscValue());
         target->SetMaxPower((Powers)GetMiscValue(), original);
     }
+    printf("\nel valor final es %i", target->GetMaxPower((Powers)GetMiscValue()));
 }
 
 /********************************/

@@ -304,6 +304,11 @@ void Player::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
+
+    for (auto it = GetAuraEffectsByType(SPELL_AURA_MOD_MAX_POWER).begin(); it != GetAuraEffectsByType(SPELL_AURA_MOD_MAX_POWER).end(); ++it)
+        if (((Powers)(*it)->GetMiscValue()) == power)
+            return; //Apaño para los efectos, probablemnte salga mal
+
     float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
     value *= GetModifierValue(unitMod, BASE_PCT);
     value += GetModifierValue(unitMod, TOTAL_VALUE);

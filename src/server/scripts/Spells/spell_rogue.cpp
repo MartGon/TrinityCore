@@ -1010,7 +1010,7 @@ public:
         void CalculateDamage(SpellEffIndex /*effIndex*/)
         {
             int32 damagePerCombo = int32(GetCaster()->GetInt32Value(UNIT_FIELD_ATTACK_POWER) * 1.42f);
-            SetHitDamage(GetEffectValue() + damagePerCombo * GetCaster()->GetPower(POWER_COMBO_POINTS));
+            SetHitDamage(GetEffectValue() + damagePerCombo * GetCaster()->ToPlayer()->GetComboPoints());
         }
 
         void HandleAfterHit()

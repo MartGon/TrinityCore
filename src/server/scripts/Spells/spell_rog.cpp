@@ -39,7 +39,7 @@ public:
 
         void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
-            printf("Hola");
+            printf("El valor de combo points es %i", GetCaster()->GetMaxPower(POWER_COMBO_POINTS));
             if (Unit* caster = GetCaster())
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
                     GetCaster()->GetSpellHistory()->ResetCooldown(GetSpellInfo()->Id, true); // Marked for death
@@ -267,6 +267,8 @@ public:
     }
 };
 
+
+//TODO fix apply aura de combo points, no se updatea al loguear
 
 void AddSC_spell_rog_spell_scripts_two()
 {

@@ -9725,6 +9725,9 @@ int32 Unit::GetCreatePowers(Powers power) const
     if (power == POWER_MANA)
         return GetCreateMana();
 
+    if (power == POWER_COMBO_POINTS)
+        printf("\n\HOLAAAAAAAAAAAAAAAA estoy jdoeindo\n\n");
+
     if (PowerTypeEntry const* powerType = sDB2Manager.GetPowerTypeEntry(power))
         return powerType->MaxPower;
 
