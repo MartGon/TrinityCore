@@ -53,7 +53,7 @@ public:
     }
 };
 
-// 76806 - Main Gauche
+// 76806 - Main Gauche (OutLaw Mastery)
 class spell_rog_main_gauche : public SpellScriptLoader
 {
 public:
@@ -108,7 +108,6 @@ public:
 
         void HandleOnRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
-            printf("El valor de combo points es %i", GetCaster()->GetMaxPower(POWER_COMBO_POINTS));
             if (Unit* caster = GetCaster())
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
                     GetCaster()->GetSpellHistory()->ResetCooldown(GetSpellInfo()->Id, true); // Marked for death
@@ -175,6 +174,61 @@ public:
 
 };
 
+// 195452 Nightblade
+class spell_rog_nightblade_aura : public SpellScriptLoader
+{
+public:
+    spell_rog_nightblade_aura() : SpellScriptLoader("spell_rog_nightblade_aura") { }
+
+    class spell_rog_nightblade_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_nightblade_aura_AuraScript);
+
+        void HandleOnProc(ProcEventInfo& eventInfo)
+        {
+            GetCaster()->CastSpell(GetTarget(), 206760, true); // Nightblade slow
+        }
+
+        void Register() override
+        {
+            OnProc += AuraProcFn(spell_rog_nightblade_aura_AuraScript::HandleOnProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_nightblade_aura_AuraScript();
+    }
+};
+
+// 222018 - Nightblade Proc
+class spell_rog_nightblade : public SpellScriptLoader
+{
+public:
+    spell_rog_nightblade() : SpellScriptLoader("spell_rog_nightblade") { }
+
+    class spell_rog_nightblade_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_nightblade_SpellScript);
+
+        void HandleOnCast()
+        {
+            GetCaster()->CastSpell(GetExplTargetUnit(), 206760, true); // Nightblade slow
+        }
+
+        void Register() override
+        {
+            OnCast += SpellCastFn(spell_rog_nightblade_SpellScript::HandleOnCast);
+        }
+    };
+
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_nightblade_SpellScript();
+    }
+};
+
 // 185438 - Shadowstrike
 class spell_rog_shadowstrike : public SpellScriptLoader
 {
@@ -187,12 +241,11 @@ public:
 
         void HandleOnCast()
         {
-            if (GetCaster()->HasAura(245623))
+            if (GetCaster()->HasAura(245623)) // Shadowstrike rank 2
             {
                 Position  pos = GetExplTargetUnit()->GetFirstCollisionPosition(GetExplTargetUnit()->GetObjectSize(),3.1416f);
                 GetCaster()->SendTeleportPacket(pos); // Teleport to back
-            }
-                
+            }  
         }
 
         void HandleOnHit(SpellEffIndex effIndex)
@@ -343,6 +396,8 @@ void AddSC_spell_rog_spell_scripts_two()
     new spell_rog_main_gauche();
     new spell_rog_marked_for_death();
     new spell_rog_master_of_subtlety_passive();
+    new spell_rog_nightblade();
+    new spell_rog_nightblade_aura();
     new spell_rog_shadow_dance_aura();
     new spell_rog_shadowstrike();
     new spell_rog_subterfuge_aura();

@@ -335,7 +335,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //267 SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL         implemented in Unit::IsImmunedToSpellEffect
     &AuraEffect::HandleUnused,                                    //268 unused (4.3.4) old SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT.
     &AuraEffect::HandleNoImmediateEffect,                         //269 SPELL_AURA_MOD_IGNORE_TARGET_RESIST implemented in Unit::CalcAbsorbResist and CalcArmorReducedDamage
-    &AuraEffect::HandleNULL,                                      //270 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER
+    &AuraEffect::HandleNoImmediateEffect,                         //270 SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER 
     &AuraEffect::HandleNoImmediateEffect,                         //271 SPELL_AURA_MOD_SPELL_DAMAGE_FROM_CASTER    implemented in Unit::SpellDamageBonusTaken and Unit::MeleeDamageBonusTaken
     &AuraEffect::HandleNoImmediateEffect,                         //272 SPELL_AURA_IGNORE_MELEE_RESET
     &AuraEffect::HandleUnused,                                    //273 clientside
@@ -4058,7 +4058,6 @@ void AuraEffect::HanldeAuraModMaxPower(AuraApplication const* aurApp, uint8 mode
         int32 original = target->GetCreatePowers((Powers)GetMiscValue());
         target->SetMaxPower((Powers)GetMiscValue(), original);
     }
-    printf("\nel valor final es %i", target->GetMaxPower((Powers)GetMiscValue()));
 }
 
 /********************************/

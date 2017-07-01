@@ -6756,6 +6756,12 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
             if ((*i)->GetCasterGUID() == caster->GetGUID() && (*i)->IsAffectingSpell(spellProto))
                 AddPct(TakenTotalMod, (*i)->GetAmount());
 
+        // From caster spells (Added by MGH)
+        AuraEffectList const& mOwnerTakenMask = GetAuraEffectsByType(SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER);
+        for (AuraEffectList::const_iterator i = mOwnerTakenMask.begin(); i != mOwnerTakenMask.end(); ++i)                   // Check Mask
+            if ((*i)->GetCasterGUID() == caster->GetGUID() && (*i)->GetSpellEffectInfo()->MiscValue & spellProto->GetSchoolMask())
+                AddPct(TakenTotalMod, (*i)->GetAmount());
+
         int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(spellProto->GetSchoolMask());
 
         // Check for table values
@@ -7598,6 +7604,12 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
             if ((*i)->GetCasterGUID() == attacker->GetGUID() && (*i)->IsAffectingSpell(spellProto))
                 AddPct(TakenTotalMod, (*i)->GetAmount());
 
+        // From caster spells (Added by MGH)
+        AuraEffectList const& mOwnerTakenMask = GetAuraEffectsByType(SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER);
+        for (AuraEffectList::const_iterator i = mOwnerTakenMask.begin(); i != mOwnerTakenMask.end(); ++i)                   // Check Mask
+            if ((*i)->GetCasterGUID() == attacker->GetGUID() && (*i)->GetSpellEffectInfo()->MiscValue & spellProto->GetSchoolMask())
+                AddPct(TakenTotalMod, (*i)->GetAmount());
+        
         // Mod damage from spell mechanic
         uint32 mechanicMask = spellProto->GetAllEffectsMechanicMask();
 
@@ -10253,6 +10265,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_RAID_PROC_FROM_CHARGE] = true;
     isTriggerAura[SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE] = true;
+    isTriggerAura[SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER] = true;
     isTriggerAura[SPELL_AURA_MOD_SPELL_DAMAGE_FROM_CASTER] = true;
     isTriggerAura[SPELL_AURA_MOD_SPELL_CRIT_CHANCE] = true;
     isTriggerAura[SPELL_AURA_ABILITY_IGNORE_AURASTATE] = true;
@@ -10641,6 +10654,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                             takeCharges = true;
                         break;
                     case SPELL_AURA_MOD_SPELL_DAMAGE_FROM_CASTER:
+                    case SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER:
                         // Compare casters
                         if (triggeredByAura->GetCasterGUID() == target->GetGUID())
                             takeCharges = true;
