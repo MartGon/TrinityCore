@@ -1,4 +1,5 @@
 //Una script chupiguay
+#include "AreaTriggerAI.h"
 #include "ScriptMgr.h"
 #include "Containers.h"
 #include "DB2Stores.h"
@@ -51,6 +52,84 @@ public:
     {
         return new spell_rog_alacrity_AuraScript();
     }
+};
+
+// 185767 Cannonball Barrage
+class spell_rog_cannonball_barrage : public SpellScriptLoader
+{
+public:
+    static char constexpr const ScriptName[] = "spell_rog_cannonball_barrage";
+    spell_rog_cannonball_barrage() : SpellScriptLoader("spell_rog_cannonball_barrage") { }
+    class spell_rog_cannonball_barrage_AuraScript;
+    class spell_rog_cannonball_barrage_SpellScript;
+
+    class spell_rog_cannonball_barrage_SpellScript : public SpellScript
+    {
+        Position pos;
+        PrepareSpellScript(spell_rog_cannonball_barrage_SpellScript);
+
+        using CannonAura = spell_rog_cannonball_barrage::spell_rog_cannonball_barrage_AuraScript;
+        template<void(CannonAura::*func)(ObjectGuid const&,Position)>
+
+        Position HelperFunction(Position desPos)
+        {
+            if (Unit* caster = GetCaster())
+                if (Aura* atonement = caster->GetAura(185767))
+                    if (CannonAura* script = atonement->GetScript<CannonAura>(spell_rog_cannonball_barrage::ScriptName))
+                        (script->*func)(GetCaster()->GetGUID(),desPos);
+
+            
+        }
+
+        void HandleOnCast()
+        {
+            pos = GetExplTargetDest()->GetPosition();
+
+            GetCaster()->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 185779, true); // CanonBall Barrage damage
+            HelperFunction<&CannonAura::SetPosition>(pos);
+        }
+
+        void Register() override
+        {
+            AfterHit += SpellHitFn(spell_rog_cannonball_barrage_SpellScript::HandleOnCast);
+        }
+    public:
+        
+    };
+
+    class spell_rog_cannonball_barrage_AuraScript : public AuraScript
+    {
+        Position pos;
+
+        PrepareAuraScript(spell_rog_cannonball_barrage_AuraScript);
+
+        void HandlePeroidic(AuraEffect const* aurEff)
+        {
+            printf("x %f y %f z %f", pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+            GetCaster()->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 185779, true); // CanonBall Barrage damage
+        }
+
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_cannonball_barrage_AuraScript::HandlePeroidic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    public:
+       
+        void SetPosition(ObjectGuid const&,Position newPos)
+        {
+            pos = newPos;
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_cannonball_barrage_AuraScript();
+    }
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_cannonball_barrage_SpellScript();
+    }   
 };
 
 // 76806 - Main Gauche (OutLaw Mastery)
@@ -393,6 +472,7 @@ public:
 void AddSC_spell_rog_spell_scripts_two()
 {
     new spell_rog_alacrity();
+    new spell_rog_cannonball_barrage();
     new spell_rog_main_gauche();
     new spell_rog_marked_for_death();
     new spell_rog_master_of_subtlety_passive();

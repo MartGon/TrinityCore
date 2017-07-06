@@ -2,6 +2,10 @@
 DELETE FROM `spell_script_names` WHERE `spell_id`=193539;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(193539,"spell_rog_alacrity");
  
+    -- 185767 Cannonball Barrage
+DELETE FROM `spell_script_names` WHERE `spell_id`=185767;
+INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(185767,"spell_rog_cannonball_barrage");
+ 
   -- 76806 - Main gauche Mastery
 DELETE FROM `spell_script_names` WHERE `spell_id`=76806;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(76806,"spell_rog_main_gauche");
