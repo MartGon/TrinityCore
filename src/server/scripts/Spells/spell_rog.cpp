@@ -468,6 +468,45 @@ public:
     }
 };
 
+// 193537 - WeaponMaster
+class spell_rog_weaponmaster : public SpellScriptLoader
+{
+public:
+    spell_rog_weaponmaster() : SpellScriptLoader("spell_rog_weaponmaster") { }
+
+    class spell_rog_weaponmaster_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_weaponmaster_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            printf("Checking weaponmaster proc");
+           return true;
+           //return roll_chance_f(GetEffect(EFFECT_0)->GetAmount() +50);
+        }
+
+        void HandleOnProc(ProcEventInfo& eventInfo)
+        {
+            printf("Habndling proc");
+            if (SpellInfo const *info = eventInfo.GetSpellInfo()) {
+                GetTarget()->CastSpell(eventInfo.GetProcTarget(), info->Id, true);
+                printf("\nEl id es %i\n", eventInfo.GetSpellInfo()->Id);
+            }
+               
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_weaponmaster_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_rog_weaponmaster_AuraScript::HandleOnProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_weaponmaster_AuraScript();
+    }
+};
 
 void AddSC_spell_rog_spell_scripts_two()
 {
@@ -481,4 +520,5 @@ void AddSC_spell_rog_spell_scripts_two()
     new spell_rog_shadow_dance_aura();
     new spell_rog_shadowstrike();
     new spell_rog_subterfuge_aura();
+    new spell_rog_weaponmaster();
 }

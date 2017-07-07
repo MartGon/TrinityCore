@@ -1170,8 +1170,21 @@ void Player::Update(uint32 p_time)
                         if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
                             setAttackTimer(OFF_ATTACK, ATTACK_DISPLAY_DELAY);
 
-                    // do attack
-                    AttackerStateUpdate(victim, BASE_ATTACK);
+                    
+                    if (HasAuraType(SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_MELEE_SPELL))
+                    {
+                        for (auto itr = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_MELEE_SPELL).begin(); itr != GetAuraEffectsByType(SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_MELEE_SPELL).end(); itr++)
+                        {
+                            if (uint32 id = (*itr)->GetSpellEffectInfo()->TriggerSpell)
+                            {
+                                CastSpell(victim, id, true);
+                                break;
+                            }
+                        }
+                    }
+                    else
+                        // do attack
+                        AttackerStateUpdate(victim, BASE_ATTACK);
                     resetAttackTimer(BASE_ATTACK);
                 }
             }
@@ -1190,8 +1203,20 @@ void Player::Update(uint32 p_time)
                     if (getAttackTimer(BASE_ATTACK) < ATTACK_DISPLAY_DELAY)
                         setAttackTimer(BASE_ATTACK, ATTACK_DISPLAY_DELAY);
 
+                    if (HasAuraType(SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_MELEE_SPELL))
+                    {
+                        for (auto itr = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_MELEE_SPELL).begin(); itr != GetAuraEffectsByType(SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_MELEE_SPELL).end(); itr++)
+                        {
+                            if (uint32 id = (*itr)->GetMiscValue())
+                            {
+                                CastSpell(victim, id, true);
+                                break;
+                            }
+                        }
+                    }
+                    else
                     // do attack
-                    AttackerStateUpdate(victim, OFF_ATTACK);
+                        AttackerStateUpdate(victim, OFF_ATTACK);
                     resetAttackTimer(OFF_ATTACK);
                 }
             }

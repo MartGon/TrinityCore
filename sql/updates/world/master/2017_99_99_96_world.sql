@@ -41,3 +41,7 @@ INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(137619,"spell_rog_m
  -- 140149 - marked-for-death triggered
 DELETE FROM `spell_script_names` WHERE `spell_id`=140149;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(140149,"spell_rog_marked_for_death");
+
+ -- 193537 - weaponMaster
+DELETE FROM `spell_script_names` WHERE `spell_id`=193537;
+INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(193537,"spell_rog_weaponmaster");
