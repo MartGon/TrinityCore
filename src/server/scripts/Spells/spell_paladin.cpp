@@ -108,7 +108,7 @@ class spell_pal_ardent_defender : public SpellScriptLoader
                 return GetUnitOwner()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void CalculateAmount(AuraEffect const* aurEff, int32 & amount, bool & canBeRecalculated)
+            void a
             {
                 // Set absorbtion amount to unlimited
                 amount = -1;
@@ -792,7 +792,7 @@ class spell_pal_item_t6_trinket : public SpellScriptLoader
 };
 
 // 20271 - Judgement
-/// Updated 4.3.4
+/// Updated 7.2.5
 class spell_pal_judgement : public SpellScriptLoader
 {
     public:
@@ -804,33 +804,18 @@ class spell_pal_judgement : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                return ValidateSpellInfo({ SPELL_PALADIN_JUDGEMENT_DAMAGE });
+                return true;
             }
 
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
-                uint32 spellId = SPELL_PALADIN_JUDGEMENT_DAMAGE;
-
-                // some seals have SPELL_AURA_DUMMY in EFFECT_2
-                Unit::AuraEffectList const& auras = GetCaster()->GetAuraEffectsByType(SPELL_AURA_DUMMY);
-                for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
-                {
-                    if ((*i)->GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_SEAL && (*i)->GetEffIndex() == EFFECT_2)
-                    {
-                        if (sSpellMgr->GetSpellInfo((*i)->GetAmount()))
-                        {
-                            spellId = (*i)->GetAmount();
-                            break;
-                        }
-                    }
-                }
-
-                GetCaster()->CastSpell(GetHitUnit(), spellId, true);
+                if(GetCaster()->HasAura(76672)) // Retribution Mastery
+                    GetCaster()->CastSpell(GetHitUnit(), 197277, true); // Judgment aura 
             }
 
             void Register() override
             {
-                OnEffectHitTarget += SpellEffectFn(spell_pal_judgement_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_pal_judgement_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
@@ -1108,7 +1093,7 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
 
             bool Validate (SpellInfo const* /*spellEntry*/) override
             {
-                return ValidateSpellInfo({ SPELL_PALADIN_DIVINE_PURPOSE_PROC });
+                return true;
             }
 
             bool Load() override
@@ -1124,33 +1109,12 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
 
             void ChangeDamage(SpellEffIndex /*effIndex*/)
             {
-                Unit* caster = GetCaster();
-                int32 damage = GetHitDamage();
-
-                if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
-                    damage *= 7.5;  // 7.5*30% = 225%
-                else
-                {
-                    switch (caster->GetPower(POWER_HOLY_POWER))
-                    {
-                        case 0: // 1 Holy Power
-                            // same damage
-                            break;
-                        case 1: // 2 Holy Power
-                            damage *= 3;    // 3*30 = 90%
-                            break;
-                        case 2: // 3 Holy Power
-                            damage *= 7.5;  // 7.5*30% = 225%
-                            break;
-                    }
-                }
-
-                SetHitDamage(damage);
+                GetCaster()->CastSpell(GetHitUnit(), 224266, true);  // Templars verdict damage spell
             }
 
             void Register() override
             {
-                OnEffectHitTarget += SpellEffectFn(spell_pal_templar_s_verdict_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+                OnEffectHitTarget += SpellEffectFn(spell_pal_templar_s_verdict_SpellScript::ChangeDamage, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 

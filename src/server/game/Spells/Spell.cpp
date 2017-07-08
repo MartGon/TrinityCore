@@ -3092,7 +3092,6 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)     /*Nuevo                                                     */
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth() && !IsThisIdOnMap(m_spellInfo->Id))
         {
-            printf("entering %i",m_spellInfo->Id);
             m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
             for (SpellEffectInfo const* effect : GetEffects())
                 if (effect && effect->GetUsedTargetObjectType() == TARGET_OBJECT_TYPE_UNIT)
@@ -3587,7 +3586,6 @@ void Spell::_handle_finish_phase()
     //Todo Se cancelan los casts de sigilo ¿?¿?¿?
     if (!(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS) && m_spellInfo->IsBreakingStealth() && m_spellInfo->CalcCastTime() == 0 && IsThisIdOnMap(m_spellInfo->Id))
     {
-        printf("entering");
         m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
         for (SpellEffectInfo const* effect : GetEffects())
             if (effect && effect->GetUsedTargetObjectType() == TARGET_OBJECT_TYPE_UNIT)

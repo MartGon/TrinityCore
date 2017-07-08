@@ -19,10 +19,13 @@
 
 void AddSC_spell_hun_steady_focus();
 void AddSC_spell_rog_spell_scripts_two();
+void AddSC_pala_spell_scripts();
+
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
     AddSC_spell_hun_steady_focus();
     AddSC_spell_rog_spell_scripts_two();
+    AddSC_pala_spell_scripts();
 }
