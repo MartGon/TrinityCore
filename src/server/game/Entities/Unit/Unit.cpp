@@ -6540,8 +6540,8 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
 
 void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellID, int32 damage, int32 overEnergize, Powers powertype)
 {
-    if (powertype == POWER_HOLY_POWER)  // HolyPower is special
-        damage += -1;
+    if (powertype == POWER_HOLY_POWER)  // HolyPower is special, it is enough to send that it is updated the amount doesn't care
+        damage = 0;
 
     WorldPackets::CombatLog::SpellEnergizeLog data;
     data.CasterGUID = GetGUID();
@@ -8364,8 +8364,6 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
         gain = maxPower - curPower;
     }
 
-    printf("\nLlamda a ain %i \n",gain);
-
     return gain;
 }
 
@@ -9655,8 +9653,6 @@ int32 Unit::GetPower(Powers power) const
     uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS || powerIndex >= MAX_POWERS_PER_CLASS)
         return 0;
-
-    //printf("\n llamada a getpower\n");
 
     return GetUInt32Value(UNIT_FIELD_POWER + powerIndex);
 }

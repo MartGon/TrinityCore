@@ -1638,8 +1638,6 @@ void Spell::EffectEnergize(SpellEffIndex /*effIndex*/)
 
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
 
-    printf("El power es %i", m_caster->GetPower(POWER_HOLY_POWER));
-
     // Mad Alchemist's Potion
     if (m_spellInfo->Id == 45051)
     {
