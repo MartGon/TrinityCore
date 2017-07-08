@@ -6,6 +6,10 @@ INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(193539,"spell_rog_a
 DELETE FROM `spell_script_names` WHERE `spell_id`=185767;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(185767,"spell_rog_cannonball_barrage");
  
+    -- 196819 - Eviscerate
+DELETE FROM `spell_script_names` WHERE `spell_id`=196819;
+INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(196819,"spell_rog_eviscerate");
+ 
   -- 76806 - Main gauche Mastery
 DELETE FROM `spell_script_names` WHERE `spell_id`=76806;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(76806,"spell_rog_main_gauche");
@@ -18,6 +22,10 @@ INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(222018,"spell_rog_n
 DELETE FROM `spell_script_names` WHERE `spell_id`=195452;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(195452,"spell_rog_nightblade_aura");
 
+  -- 2098 - Run Through
+DELETE FROM `spell_script_names` WHERE `spell_id`=2098;
+INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(2098,"spell_rog_run_through");
+
  -- 185313 - Shadow Dance
 DELETE FROM `spell_script_names` WHERE `spell_id`=185313;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(185313,"spell_rog_shadow_dance_aura");
@@ -25,6 +33,14 @@ INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(185313,"spell_rog_s
  -- 185438 - ShadowStrike
 DELETE FROM `spell_script_names` WHERE `spell_id`=185438;
 INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(185438,"spell_rog_shadowstrike");
+
+ -- 196912 - Shadow Techniques
+DELETE FROM `spell_script_names` WHERE `spell_id`=196912;
+INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(196912,"spell_rog_shadow_techniques");
+
+ -- 197835 - Shadow Techniques
+DELETE FROM `spell_script_names` WHERE `spell_id`=197835;
+INSERT INTO `spell_script_names`(spell_id,ScriptName) VALUES(197835,"spell_rog_shuriken_storm");
 
  -- 31223 - Master of subtlety passive
 DELETE FROM `spell_script_names` WHERE `spell_id`=31223;

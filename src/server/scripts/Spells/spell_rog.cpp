@@ -132,6 +132,44 @@ public:
     }   
 };
 
+// 196819 - Eviscerate
+class spell_rog_eviscerate : public SpellScriptLoader
+{
+public:
+    spell_rog_eviscerate() : SpellScriptLoader("spell_rog_eviscerate") { }
+
+    class spell_rog_eviscerate_SpellScript : public SpellScript
+    {
+        bool first = false;
+        PrepareSpellScript(spell_rog_eviscerate_SpellScript);
+
+        void HandleOnHit(SpellEffIndex effIndex)
+        {
+            float extra = 1;
+            if (GetCaster()->HasAura(245640)) // SHuriken Combo
+            {
+                extra += GetCaster()->GetAura(245640)->GetStackAmount() * 0.1f;
+                GetCaster()->RemoveAura(245640);
+            }
+
+            int8 combo = GetCaster()->ToPlayer()->GetComboPoints();
+            SetHitDamage(GetEffectValue() + GetCaster()->ToPlayer()->GetInt32Value(UNIT_FIELD_ATTACK_POWER) * 0.98f * 2 * 1.375f * combo * extra);
+        }
+
+        void Register() override
+        {
+            OnEffectLaunchTarget += SpellEffectFn(spell_rog_eviscerate_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_eviscerate_SpellScript();
+    }
+};
+
 // 76806 - Main Gauche (OutLaw Mastery)
 class spell_rog_main_gauche : public SpellScriptLoader
 {
@@ -429,6 +467,101 @@ class spell_rog_shadow_dance_aura : public SpellScriptLoader
 
 };
 
+// 196912 - Shadow Techniques
+class spell_rog_shadow_techniques : public SpellScriptLoader
+{
+public:
+    spell_rog_shadow_techniques() : SpellScriptLoader("spell_rog_shadow_techniques") { }
+
+    class spell_rog_shadow_techniques_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_shadow_techniques_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo
+            ({
+                SPELL_ROGUE_MASTERY_MAIN_GAUCHE,
+                SPELL_ROGUE_MAIN_GAUCHE_ATTACK
+            });
+        }
+
+        void HandleOnProc(ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            uint32 stacks = irand(3, 5);
+            if (GetEffect(EFFECT_0)->GetAmount() == 0)
+            {
+                GetEffect(EFFECT_0)->SetAmount(stacks);
+            }
+            else
+            {
+                GetEffect(EFFECT_0)->SetAmount(GetEffect(EFFECT_0)->GetAmount() - 1);
+                if (GetEffect(EFFECT_0)->GetAmount() == 0)
+                {
+                    GetTarget()->CastSpell((Unit*)nullptr, 196911, true);
+                    GetEffect(EFFECT_0)->SetAmount(stacks);
+                }
+            }   
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            return true;
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_shadow_techniques_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_rog_shadow_techniques_AuraScript::HandleOnProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_rog_shadow_techniques_AuraScript();
+    }
+};
+
+// 197835 Shuriken Storm
+class spell_rog_shuriken_storm : public SpellScriptLoader
+{
+public:
+    spell_rog_shuriken_storm() : SpellScriptLoader("spell_rog_shuriken_storm") { }
+
+    class spell_rog_shuriken_storm_SpellScript : public SpellScript
+    {
+        bool first = false;
+        PrepareSpellScript(spell_rog_shuriken_storm_SpellScript);
+
+        void HandleOnHit(SpellEffIndex effIndex)
+        {
+            if (GetCaster()->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                SetHitDamage(GetHitDamage() * 2);
+            GetCaster()->CastSpell((Unit*)nullptr, 212743, true);   // Shuriken Storm energize
+
+            if (GetCaster()->HasAura(245639) && first) //Shuriken Combo Passive
+            {
+                GetCaster()->CastSpell((Unit*)nullptr, 245640, true); // Shuriken Combo Aura
+            }
+
+            first = true;
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_rog_shuriken_storm_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_shuriken_storm_SpellScript();
+    }
+};
+
 // 115192 - Subterfuge effect
 class spell_rog_subterfuge_aura : public SpellScriptLoader
 {
@@ -480,25 +613,32 @@ public:
 
         bool CheckProc(ProcEventInfo& eventInfo)
         {
-            printf("Checking weaponmaster proc");
-           return true;
-           //return roll_chance_f(GetEffect(EFFECT_0)->GetAmount() +50);
+            if (roll_chance_i(GetEffect(EFFECT_0)->GetAmount()))
+            {
+                uint32 damage = eventInfo.GetDamageInfo()->GetDamage();
+
+                if (Player *play = GetTarget()->ToPlayer())
+                    play->ApplySpellMod(193536, SPELLMOD_DAMAGE, damage);
+
+                GetTarget()->CastCustomSpell(193536, SPELLVALUE_BASE_POINT0, damage, eventInfo.GetProcTarget(), true, NULL);
+                
+            }
+          return true;
+        }
+        void HandlePrepProc(ProcEventInfo& eventInfo)
+        {
         }
 
         void HandleOnProc(ProcEventInfo& eventInfo)
         {
-            printf("Habndling proc");
-            if (SpellInfo const *info = eventInfo.GetSpellInfo()) {
-                GetTarget()->CastSpell(eventInfo.GetProcTarget(), info->Id, true);
-                printf("\nEl id es %i\n", eventInfo.GetSpellInfo()->Id);
-            }
-               
         }
+
 
         void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_rog_weaponmaster_AuraScript::CheckProc);
             OnProc += AuraProcFn(spell_rog_weaponmaster_AuraScript::HandleOnProc);
+            DoPrepareProc += AuraProcFn(spell_rog_weaponmaster_AuraScript::HandlePrepProc);
         }
     };
 
@@ -512,6 +652,7 @@ void AddSC_spell_rog_spell_scripts_two()
 {
     new spell_rog_alacrity();
     new spell_rog_cannonball_barrage();
+    new spell_rog_eviscerate();
     new spell_rog_main_gauche();
     new spell_rog_marked_for_death();
     new spell_rog_master_of_subtlety_passive();
@@ -519,6 +660,8 @@ void AddSC_spell_rog_spell_scripts_two()
     new spell_rog_nightblade_aura();
     new spell_rog_shadow_dance_aura();
     new spell_rog_shadowstrike();
+    new spell_rog_shadow_techniques();
+    new spell_rog_shuriken_storm();
     new spell_rog_subterfuge_aura();
     new spell_rog_weaponmaster();
 }

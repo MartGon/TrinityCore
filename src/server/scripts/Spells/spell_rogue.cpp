@@ -997,19 +997,19 @@ public:
 };
 
 // 2098 - Run Through
-class spell_rog_eviscerate : public SpellScriptLoader
+class spell_rog_run_through : public SpellScriptLoader
 {
 public:
-    spell_rog_eviscerate() : SpellScriptLoader("spell_rog_eviscerate") { }
+    spell_rog_run_through() : SpellScriptLoader("spell_rog_run_through") { }
 
-    class spell_rog_eviscerate_SpellScript : public SpellScript
+    class spell_rog_run_through_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_rog_eviscerate_SpellScript);
+        PrepareSpellScript(spell_rog_run_through_SpellScript);
 
 
         void CalculateDamage(SpellEffIndex /*effIndex*/)
         {
-            int32 damagePerCombo = int32(GetCaster()->GetInt32Value(UNIT_FIELD_ATTACK_POWER) * 1.42f);
+            int32 damagePerCombo = int32(GetCaster()->GetInt32Value(UNIT_FIELD_ATTACK_POWER) * 1.42f * 2);
             SetHitDamage(GetEffectValue() + damagePerCombo * GetCaster()->ToPlayer()->GetComboPoints());
         }
 
@@ -1019,14 +1019,14 @@ public:
 
         void Register() override
         {
-            OnEffectLaunchTarget += SpellEffectFn(spell_rog_eviscerate_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            AfterHit += SpellHitFn(spell_rog_eviscerate_SpellScript::HandleAfterHit);
+            OnEffectLaunchTarget += SpellEffectFn(spell_rog_run_through_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(spell_rog_run_through_SpellScript::HandleAfterHit);
         }
     };
 
     SpellScript* GetSpellScript() const override
     {
-        return new spell_rog_eviscerate_SpellScript();
+        return new spell_rog_run_through_SpellScript();
     }
 };
 
@@ -1408,7 +1408,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_saber_slash();
     new spell_rog_serrated_blades();
     new spell_rog_honor_among_thieves();
-    new spell_rog_eviscerate();
+    new spell_rog_run_through();
     new spell_rog_between_eyes();
     new spell_rog_envenom();
     new spell_rog_grappling_hook();
