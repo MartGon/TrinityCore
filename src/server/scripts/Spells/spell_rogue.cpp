@@ -1173,106 +1173,73 @@ public:
             spellIDs.push_back(SPELL_ROGUE_TRUE_BEARING);
             spellIDs.push_back(SPELL_ROGUE_SHARK_INFESTED_WATER);
 
+            GetCaster()->SendPlayOrphanSpellVisual(GetCaster()->GetPosition(), 56830, 0, 0.0f);
+            GetCaster()->SendPlayOrphanSpellVisual(GetCaster()->GetPosition(), 56600, 0, 1.256637f); //Arreglando effecto visual dados
+            GetCaster()->SendPlayOrphanSpellVisual(GetCaster()->GetPosition(), 56598, 0, 2.513274f);
+            GetCaster()->SendPlayOrphanSpellVisual(GetCaster()->GetPosition(), 56830, 0, 3.769911f);
+            GetCaster()->SendPlayOrphanSpellVisual(GetCaster()->GetPosition(), 56830, 0, 5.026548f);
+            
+
             int32 dice_number = spellIDs.size();
 
             for (std::vector<int32>::iterator itr = spellIDs.begin(); itr != spellIDs.end(); itr++)
                 GetCaster()->RemoveAura(*itr);
 
-            for (int i = 0; i < 6; i++) 
+            for (int i = 0; i < dice_number; i++) 
             {
                 int32 selector = irand(0, dice_number - 1);
                 count[spellIDs.at(selector)]++;
                 printf("Ha salido esta spell %i\n", spellIDs.at(selector));
             }
 
-            GetWinner(count);
-            AddAuras();
+            AddAuras(count, GetMax(count));
         }
 
     private:
-        int32 GetWinner(std::map<int32, int32> map)
+        int32 GetMax(std::map<int32, int32> map)
         {
             int32 max = 0;
-            winner = 0;
-            winner2 = 0;
-            winner3 = 0;
+
+            // Hallar los maximos
             for (std::map<int32, int32>::iterator itr = map.begin(); itr != map.end(); itr++) 
             {
-                std::cout << "El first " << itr->first << "El second " << itr->second << "\n";
                 if (max > 3)
                     break;
                 if (itr == map.begin())
                 {
                     max = itr->second;
-                    winner = itr->first;
-                    continue;
                 }
-                if (max >= itr->second)
-                    continue;
-                if (max < itr->second) 
+                else if (max < itr->second) 
                 {
                     max = itr->second;
-                    winner = itr->first;
                 }
             }
-            if (max == 1)isTie = true;
-            if (max == 2)
-                for (std::map<int32, int32>::iterator itr = map.begin(); itr != map.end(); itr++)
-                {
-                    if (winner2 != 0 && itr->second == max && itr->first != winner && itr->first != winner2) 
-                        winner3 = itr->first;
-                    if (itr->second == max && itr->first != winner) 
-                        winner2 = itr->first;
-                }
-            if(max == 3)
-                for (std::map<int32, int32>::iterator itr = map.begin(); itr != map.end(); itr++)
-                {
-                    if (itr->second == max && itr->first != winner)
-                        winner3 = itr->first;
-                }
-            return winner;
+
+            return max;
         }
 
         int32 CalcDuration()
         {
             int32 duration = 0;
-            duration = (GetCaster()->GetPower(POWER_COMBO_POINTS)) * 6 + 6;
+            duration = (GetCaster()->ToPlayer()->GetComboPoints()) * 6 + 6;
             return duration * 1000;
         }
 
-        void AddAuras()
+        void AddAuras(std::map<int32, int32> map, int32 max)
         {
-            std::cout << "winner " << winner << " winner2 " << winner2 << " winner3 " << winner3;
-            if (isTie)
-                for (std::vector<int32>::iterator itr = spellIDs.begin(); itr != spellIDs.end(); itr++)
+                for (std::map<int32, int32>::iterator itr = map.begin(); itr != map.end(); itr++)
                 {
-                    GetCaster()->AddAura(*itr, GetCaster());
-                    GetCaster()->GetAura(*itr)->SetMaxDuration(CalcDuration());
-                    GetCaster()->GetAura(*itr)->SetDuration(CalcDuration());
-                    return;
+                    if (itr->second == max)
+                    {
+                        GetCaster()->AddAura(itr->first, GetCaster());
+                        GetCaster()->GetAura(itr->first)->SetMaxDuration(CalcDuration());
+                        GetCaster()->GetAura(itr->first)->SetDuration(CalcDuration());
+                    }
                 }
-            if (winner3 !=0)
-            {
-                GetCaster()->AddAura(winner3, GetCaster());
-                GetCaster()->GetAura(winner3)->SetMaxDuration(CalcDuration());
-                GetCaster()->GetAura(winner3)->SetDuration(CalcDuration());
-            }
-            if (winner2 !=0)
-            {
-                GetCaster()->AddAura(winner2, GetCaster());
-                GetCaster()->GetAura(winner2)->SetMaxDuration(CalcDuration());
-                GetCaster()->GetAura(winner2)->SetDuration(CalcDuration());
-            }
-            GetCaster()->AddAura(winner, GetCaster());
-            GetCaster()->GetAura(winner)->SetMaxDuration(CalcDuration());
-            GetCaster()->GetAura(winner)->SetDuration(CalcDuration(),true);
         }
 
         std::vector<int32> spellIDs;
         std::map<int32, int32> count;
-        int32 winner;
-        int32 winner2;
-        int32 winner3;
         bool isTie = false;
 
         void Register() override
